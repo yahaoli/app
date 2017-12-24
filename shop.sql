@@ -1,0 +1,142 @@
+/*
+Navicat MySQL Data Transfer
+
+Source Server         : 127.0.0.1_3306
+Source Server Version : 50718
+Source Host           : 127.0.0.1:3306
+Source Database       : shop
+
+Target Server Type    : MYSQL
+Target Server Version : 50718
+File Encoding         : 65001
+
+Date: 2017-12-24 12:02:15
+*/
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for card
+-- ----------------------------
+DROP TABLE IF EXISTS `card`;
+CREATE TABLE `card` (
+  `goodsid` int(10) unsigned NOT NULL COMMENT '商品id',
+  `user` int(10) unsigned NOT NULL COMMENT '用户id',
+  `addtime` datetime NOT NULL,
+  `num` int(11) NOT NULL COMMENT '数量',
+  UNIQUE KEY `card_index3` (`goodsid`,`user`),
+  KEY `card_index1` (`goodsid`) USING BTREE,
+  KEY `card_index2` (`user`) USING BTREE,
+  CONSTRAINT `card_ibfk_1` FOREIGN KEY (`user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
+  CONSTRAINT `card_ibfk_2` FOREIGN KEY (`goodsid`) REFERENCES `platform` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
+
+-- ----------------------------
+-- Records of card
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for platform
+-- ----------------------------
+DROP TABLE IF EXISTS `platform`;
+CREATE TABLE `platform` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '商品id',
+  `name` varchar(22) COLLATE utf8_unicode_ci NOT NULL COMMENT '商品名',
+  `price` float(10,2) NOT NULL COMMENT '商品价格',
+  `type` varchar(10) COLLATE utf8_unicode_ci NOT NULL COMMENT '商品类型',
+  `img` varchar(10) COLLATE utf8_unicode_ci NOT NULL COMMENT '商品图片',
+  PRIMARY KEY (`id`),
+  KEY `platform1` (`name`) USING BTREE,
+  KEY `platform2` (`price`) USING BTREE,
+  KEY `platform3` (`type`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- ----------------------------
+-- Records of platform
+-- ----------------------------
+INSERT INTO `platform` VALUES ('1', '爱普诗巧克力礼盒', '6.00', '辣条', '1.png');
+INSERT INTO `platform` VALUES ('4', '比利时进口酒心巧克力', '12.00', '巧克力', '2.png');
+INSERT INTO `platform` VALUES ('5', '丹麦进口蓝罐曲奇', '13.00', '曲奇', '3.png');
+INSERT INTO `platform` VALUES ('6', '丹麦曲奇', '15.00', '曲奇', '4.png');
+INSERT INTO `platform` VALUES ('7', '费列罗糖果巧克力礼盒', '18.00', '巧克力', '5.png');
+INSERT INTO `platform` VALUES ('8', '国产巧克力礼盒', '20.00', '巧克力', '6.png');
+INSERT INTO `platform` VALUES ('9', '韩国进口迷你海苔', '17.00', '海苔', '7.png');
+INSERT INTO `platform` VALUES ('10', '韩国进口清净园海苔', '15.00', '海苔', '8.png');
+INSERT INTO `platform` VALUES ('11', '金贝壳巧克力贝壳', '22.00', '巧克力', '9.png');
+INSERT INTO `platform` VALUES ('12', '马来西亚进口麦阿斯曲奇', '33.00', '曲奇', '10.png');
+INSERT INTO `platform` VALUES ('13', '美国进口精选坚果', '25.00', '坚果', '11.png');
+INSERT INTO `platform` VALUES ('14', '美国进口夹心饼干', '22.00', '饼干', '12.png');
+INSERT INTO `platform` VALUES ('15', '牛扎饼', '15.00', '饼干', '13.png');
+INSERT INTO `platform` VALUES ('16', '泰国进口混合坚果', '16.00', '坚果', '14.png');
+INSERT INTO `platform` VALUES ('17', '泰国进口榴莲干', '18.00', '水果干', '15.png');
+INSERT INTO `platform` VALUES ('18', '蛮脆果', '15.00', '水果干', '16.png');
+INSERT INTO `platform` VALUES ('19', '威化饼干', '14.00', '饼干', '17.png');
+INSERT INTO `platform` VALUES ('20', '香蕉片', '18.00', '水果干', '18.png');
+INSERT INTO `platform` VALUES ('21', '榛仁夹心饼干', '20.00', '饼干', '19.png');
+INSERT INTO `platform` VALUES ('22', '意大利进口芝士蛋卷', '22.00', '蛋卷', '20.png');
+INSERT INTO `platform` VALUES ('23', '张君雅小妹妹休闲零食', '36.00', '零食', '21.png');
+
+-- ----------------------------
+-- Table structure for record
+-- ----------------------------
+DROP TABLE IF EXISTS `record`;
+CREATE TABLE `record` (
+  `goodsid` int(10) unsigned NOT NULL,
+  `time` datetime NOT NULL,
+  `num` int(11) unsigned NOT NULL,
+  `user` int(10) unsigned NOT NULL,
+  KEY `record_index1` (`goodsid`) USING BTREE,
+  KEY `record_index2` (`time`) USING BTREE,
+  KEY `record_index4` (`num`) USING BTREE,
+  KEY `record_key1` (`user`),
+  CONSTRAINT `record_key1` FOREIGN KEY (`user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- ----------------------------
+-- Records of record
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for store
+-- ----------------------------
+DROP TABLE IF EXISTS `store`;
+CREATE TABLE `store` (
+  `goodsid` int(10) unsigned NOT NULL,
+  `num` int(10) unsigned NOT NULL,
+  `addtime` datetime DEFAULT NULL,
+  `nulltime` datetime DEFAULT NULL,
+  `user` int(10) unsigned NOT NULL,
+  UNIQUE KEY `store_index3` (`goodsid`,`user`),
+  KEY `store_index1` (`addtime`) USING BTREE,
+  KEY `store_index2` (`nulltime`) USING BTREE,
+  KEY `store_key1` (`user`),
+  CONSTRAINT `store_key1` FOREIGN KEY (`user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- ----------------------------
+-- Records of store
+-- ----------------------------
+INSERT INTO `store` VALUES ('1', '214', '2017-12-23 14:00:17', null, '1');
+INSERT INTO `store` VALUES ('1', '101', '2017-12-23 13:40:30', null, '2');
+INSERT INTO `store` VALUES ('4', '114', '2017-12-23 14:00:17', null, '1');
+INSERT INTO `store` VALUES ('4', '101', '2017-12-23 13:40:30', null, '2');
+INSERT INTO `store` VALUES ('5', '113', '2017-12-23 13:56:25', null, '1');
+INSERT INTO `store` VALUES ('5', '101', '2017-12-23 13:40:30', null, '2');
+
+-- ----------------------------
+-- Table structure for user
+-- ----------------------------
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE `user` (
+  `user_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户id',
+  `user_name` varchar(10) COLLATE utf8_unicode_ci NOT NULL COMMENT '用户名',
+  `user_password` varchar(10) COLLATE utf8_unicode_ci NOT NULL COMMENT '用户密码',
+  PRIMARY KEY (`user_id`),
+  KEY `user_name` (`user_name`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- ----------------------------
+-- Records of user
+-- ----------------------------
+INSERT INTO `user` VALUES ('1', '小明', '123');
+INSERT INTO `user` VALUES ('2', '小花', '123');
