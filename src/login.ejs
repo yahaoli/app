@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>小型超市库存管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <style>
+        body {
+            background: url(public/images/loginbg_01.jpg) no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .lu-login-div {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            margin: -135px 0 0 -240px;
+            padding: 15px 20px;
+            width: 480px;
+            height: 270px;
+            min-width: 320px;
+            background: #FAFAFA;
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 1px 5px 8px #888888;
+            border-radius: 6px;
+        }
+        .lu-login-div h1{font-size: 36px;text-align: center;margin-top: 20px;margin-bottom: 10px;font-weight: 500}
+        .lu-login-div form{width: 410px}
+    </style>
+</head>
+<body>
+<div class="lu-login-div">
+    <h1>小型超市库存管理系统</h1>
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名:</label>
+            <div class="layui-input-block">
+                <input type="text" name="name"  lay-verify="required" placeholder="请输入用户名" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码:</label>
+            <div class="layui-input-block">
+                <input type="password" name="password"  lay-verify="required" placeholder="请输入密码"
+                       autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">登录</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script src="layui/layui.js"></script>
+<script src="public/javascripts/ajax_1.js"></script>
+<script>
+    //Demo
+    layui.use(['form','jquery'], function () {
+        var form = layui.form;
+        var $ = layui.$;
+        //监听提交
+        form.on('submit(formDemo)', function (data) {
+            common_.ajax_({type:'post',url:'users/login',data:data.field}).then(function (data1) {
+              window.location.href='/'
+            })
+            return false
+        });
+    });
+</script>
+</html>

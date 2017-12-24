@@ -1,0 +1,93 @@
+<style>
+    table.layui-table th, tr {
+        text-align: center
+    }
+
+    .layui-laypage {
+        margin: 0;
+    }
+</style>
+<div class="layui-table-box table-size" style="height: 500px;overflow: auto">
+    <table class="layui-table" >
+        <thead>
+        <tr>
+            <th>商品编号</th>
+            <th>商品名</th>
+            <th>商品价格</th>
+            <th>商品类型</th>
+            <th>商品图片</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="buy_platform" >
+        </tbody>
+    </table>
+
+</div>
+<div  class="lu-table-page">
+    <div id="platform-page"></div>
+
+    <div style="position: absolute;right: 20px;top:1px">
+        <button id="platform-shop" class="layui-btn">
+            <i class="layui-icon">&#xe698;</i><span id="platform-num"></span>
+        </button>
+    </div>
+</div>
+<script src="public/javascripts/table_size.js"> </script>
+<script>
+    layui.use(['jquery', 'laypage', 'layer'], function () {
+        var layer = layui.layer, $ = layui.$;
+        var laypage = layui.laypage;
+        common_.ajax_({type: 'post', url: '/validate/platformAll'}).then(function (data1) {
+            $('#page-con').html('');
+            var num=parseInt(data1.count1)===0?'':data1.count1;
+            $('#platform-num').html(num);
+            laypage.render({
+                elem: 'platform-page' //注意，这里的 test1 是 ID，不用加 # 号
+                , count: data1.count //数据总数，从服务端得到
+                , limit: data1.limit //数据条数
+                , curr: 1 //当前页码
+                , layout: ['prev', 'count', 'page', 'next', 'skip'] //设置操作栏
+                , jump: function (obj, first) {
+                    common_.ajax_({
+                        type: 'post',
+                        url: '/validate/platform',
+                        data: {page: obj.curr, limit: obj.limit}
+                    }, true).then(function (data) {
+                        var tr = '';
+                        $.each(data.data, function (index, val) {
+                            tr += '<tr>'
+                            tr += '<td>' + val.id + '</td>'
+                            tr += '<td>' + val.name + '</td>'
+                            tr += '<td>' + val.price + '</td>'
+                            tr += '<td>' + val.type + '</td>'
+                            tr += '<td><img src="public/shop/' + val.img + '" alt=""></td>'
+                            tr += '<td> <i data-id="' + val.id + '" lay-event="add" class="layui-icon" style="cursor: pointer;font-size: 22px; color: #1E9FFF;">&#xe608;</i></td>'
+                            tr += '</tr>'
+                        });
+                        $('#buy_platform').html(tr)
+                    })
+                }
+            });
+        });
+        $('#buy_platform').on('click','.layui-icon',function () {
+            common_.ajax_({type: 'post', url: '/validate/platform/add',data:{id:$(this).attr('data-id')}}).then(function (data1) {
+                layer.msg(data1.msg);
+                var num=parseInt(data1.count)===0?'':data1.count;
+                $('#platform-num').html(num)
+            })
+        })
+        $('#platform-shop').click(function () {
+            //console.log(111111111)
+            $.get('model/purchase_shop.html').then(function (data) {
+                layer.open({
+                    type: 1
+                    ,title:'采购单'
+                    //skin: 'layui-layer-rim', //加上边框
+                    ,area: ['800px', '400px'] //宽高
+                    ,content: data
+                });
+            })
+        })
+    })
+</script>

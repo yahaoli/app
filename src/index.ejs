@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>小型超市库存管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <style>
+       .lu-table-page{position: relative;padding: 5px 0 0 5px;border: solid 1px #e6e6e6}
+    </style>
+</head>
+<body>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">小型超市库存管理系统</div>
+        <!-- <ul class="layui-nav layui-layout-left">
+             <li class="layui-nav-item"><a href="">控制台</a></li>
+             <li class="layui-nav-item"><a href="">商品管理</a></li>
+             <li class="layui-nav-item"><a href="">用户</a></li>
+             <li class="layui-nav-item">
+                 <a href="javascript:;">其它系统</a>
+                 <dl class="layui-nav-child">
+                     <dd><a href="">邮件管理</a></dd>
+                     <dd><a href="">消息管理</a></dd>
+                     <dd><a href="">授权管理</a></dd>
+                 </dl>
+             </li>
+         </ul>-->
+        <ul class="layui-nav layui-layout-right" lay-filter="demo">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+                    <%= name %>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="javascript:;">基本资料</a></dd>
+                    <dd><a href="javascript:;">安全设置</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="javascript:;">退了</a></li>
+            <!-- <li class="layui-nav-item"><a href="javascript:;">登录</a></li>-->
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul id="nav-list" class="layui-nav layui-nav-tree" lay-filter="demo">
+                <li class="layui-nav-item"><a title="model/purchase_platform.html" href="javascript:;">采购入库</a></li>
+                <li class="layui-nav-item"><a href="javascript:;">销售出库</a></li>
+                <li class="layui-nav-item"><a href="javascript:;">销售退货</a></li>
+                <li class="layui-nav-item"><a href="javascript:;">库存明细</a></li>
+                <li class="layui-nav-item">
+                    <a class="" href="javascript:;">货品分析</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;">进货分析</a></dd>
+                        <dd><a href="javascript:;">出货分析</a></dd>
+                        <dd><a href="javascript:;">财务分析</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body" style="bottom: 0">
+        <!-- 内容主体区域 -->
+        <!--<div style="padding: 15px;">内容主体区域</div>-->
+        <!--<div class="layui-upload">-->
+        <!--<button type="button" class="layui-btn" id="test1">上传图片</button>-->
+        <!--<div class="layui-upload-list">-->
+        <!--<img style="width: 100px;height: 100px" class="layui-upload-img" id="demo1">-->
+        <!--<p id="demoText"></p>-->
+        <!--</div>-->
+        <!--</div>-->
+        <div class="layui-tab" lay-allowClose="true" lay-filter="demo">
+            <ul class="layui-tab-title">
+                <!--<li class="layui-this">网站设置</li>-->
+                <!--<li>商品管理</li>-->
+                <!--<li>订单管理</li>-->
+            </ul>
+            <div class="layui-tab-content">
+                <!--<div class="layui-tab-item layui-show">欢迎</div>-->
+                <!--<div class="layui-tab-item">内容2</div>-->
+                <!--<div class="layui-tab-item">内容3</div>-->
+            </div>
+        </div>
+    </div>
+</div>
+<script src="layui/layui.js"></script>
+<script src="public/javascripts/ajax_1.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use(['element', 'jquery'], function () {
+        var element = layui.element,
+            $ = layui.$,
+            tab = [];
+        $('ul.layui-tab-title').on('click', 'i', function () {
+            var layId = $(this).parent().attr('lay-id');
+            var index = tab.indexOf(layId);
+            tab.splice(index, 1);
+            element.tabDelete('demo', layId);
+            $('#page-con').html('')
+        });
+        window.addTab = function (title, title_url) {
+            var index = tab.indexOf(title);
+            if (index === -1) {
+                $.get(title_url).then(function (data) {
+                    tab.push(title);
+                    element.tabAdd('demo', {
+                        title: title + "<i class='layui-icon layui-unselect layui-tab-close'>ဆ</i>"
+                        , content: data  //支持传入html
+                        , id: title
+                    });
+                    element.tabChange('demo', title);
+                })
+            } else {
+                title = tab[index]
+            }
+            element.tabChange('demo', title);
+        };
+        element.on('nav(demo)', function (elem) {
+            var nav = $(elem).find('a');
+            var title = $(elem).find('a').html();
+            var title_url = $(elem).find('a').attr('title');
+            if (title === "退了") {
+                common_.ajax_({type: 'get', url: 'users/exit'}).then(function (data1) {
+                    window.location.href = '/'
+                })
+                return;
+            }
+            addTab(title, title_url)
+        });
+
+    });
+    /*layui.use('upload', function () {
+        var $ = layui.jquery
+            , upload = layui.upload;
+
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem: '#test1'
+            , auto: false
+            , choose: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#demo1').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                //如果上传失败
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                }
+                //上传成功
+            }
+            , error: function () {
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-mini demo-reload">重试</a>');
+                demoText.find('.demo-reload').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+        });
+    });*/
+</script>
+</body>
+</html>

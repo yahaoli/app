@@ -1,0 +1,77 @@
+<style>
+    .purchaseShop-input{width: 40px;height: 20px;line-height: 20px;text-align: center;cursor: pointer}
+    .menu-control{background-color: #F8F8F8;overflow: hidden;border-top: 1px solid #eee;padding: 5px 0}
+</style>
+<div class="layui-table-box" style="height: 308px;overflow: auto">
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>商品编号</th>
+            <th>商品名</th>
+            <th>商品价格</th>
+            <th>商品图片</th>
+            <th>商品数量</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="purchaseShop-con">
+        </tbody>
+    </table>
+</div>
+<div id="purchaseShop-control" class="menu-control">
+    <button style="float: right;margin-right: 10px" class="layui-btn layui-btn-radiu">提交</button>
+    <button  class="layui-btn layui-btn-radiu">清空</button>
+</div>
+<script>
+    layui.use(['jquery', 'layer'], function () {
+        var layer = layui.layer, $ = layui.$;
+        common_.ajax_({type: 'post', url: '/validate/platform/purchase'}).then(function (data1) {
+            var tr = '';
+            $.each(data1.data, function (index, val) {
+                tr += '<tr>'
+                tr += '<td>' + val.goodsid + '</td>'
+                tr += '<td>' + val.name + '</td>'
+                tr += '<td>' + val.price + '</td>'
+                tr += '<td><img style="height: 50px" src="public/shop/' + val.img + '" alt=""></td>'
+                tr += '<td>'+ val.num +'</td>'
+                tr += '<td data-id="'+val.goodsid+'"><button  class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe642;</i></button><button class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe640;</i></button></td>'
+                tr += '</tr>'
+            });
+            $('#purchaseShop-con').html(tr)
+        });
+        $('#purchaseShop-con').on('click','button',function () {
+            var url=$(this).next().length?'set':'delete';
+            var that=$(this);
+            var data={id:that.parent().attr('data-id')};
+            if(url==='set'){
+                layer.prompt({title: '输入数量', formType: 0}, function(num, index){
+                    data.num=num;
+                    /(^[1-9]\d*$)/.test(num)?shop_set(url,data,that)&&layer.close(index):layer.msg('请输入整数');
+                });
+            }else {
+                shop_set(url,data,that)
+            }
+        });
+        function shop_set(url,data,that) {
+            common_.ajax_({type: 'post', url: '/validate/purchase/'+url,data:data}).then(function (data1) {
+                layer.msg(data1.msg);
+                if(url==='delete'){
+                    that.parent().parent().remove();
+                    var num=$('#platform-num').text()*1===1?'':$('#platform-num').text()*1-1;
+                    $('#platform-num').text(num)
+                }else {
+                    that.parent().prev().html(data.num)
+                }
+            });
+            return true
+        }
+        $('#purchaseShop-control').on('click','button',function () {
+           var url=$(this).text()==='清空'?'clear':'submit';
+            common_.ajax_({type: 'post', url: '/validate/platform/'+url}).then(function (data1) {
+                layer.msg(data1.message);
+                $('#purchaseShop-con,#platform-num').html('');
+            })
+        })
+
+    })
+</script>
