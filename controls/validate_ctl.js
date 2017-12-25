@@ -1,6 +1,5 @@
 module.exports = {
     platform: async function (req, res) {
-        console.log(11111111)
         try {
             var start = (parseInt(req.body.page) - 1) * req.body.limit, end = parseInt(req.body.limit);
             var data = await sql.db_mysql('SELECT * FROM platform limit ?,?', [start, end]);
