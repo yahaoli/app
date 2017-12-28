@@ -9,10 +9,10 @@ module.exports = {
                         req.session.user_id=id;
                         res.send({code:1})
                     }else{
-                        res.send({code:2,message:"密码错误"})
+                        res.send({code:2,msg:"密码错误"})
                     }
             }else {
-                res.send({code:2,message:"用户不存在"})
+                res.send({code:2,msg:"用户不存在"})
             }
         } catch (err) {
             console.log(err.message)

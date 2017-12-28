@@ -49,7 +49,7 @@
                 <li class="layui-nav-item"><a title="model/purchase_platform.html" href="javascript:;">采购入库</a></li>
                 <li class="layui-nav-item"><a href="javascript:;">销售出库</a></li>
                 <li class="layui-nav-item"><a href="javascript:;">销售退货</a></li>
-                <li class="layui-nav-item"><a href="javascript:;">库存明细</a></li>
+                <li class="layui-nav-item"><a title="model/store_platform.html" href="javascript:;">库存明细</a></li>
                 <li class="layui-nav-item">
                     <a class="" href="javascript:;">货品分析</a>
                     <dl class="layui-nav-child">
@@ -89,6 +89,8 @@
 <script src="layui/layui.js"></script>
 <script src="public/javascripts/ajax_1.js"></script>
 <script>
+    //定义一个全局变量
+    LYHcurrentIndex={}
     //JavaScript代码区域
     layui.use(['element', 'jquery'], function () {
         var element = layui.element,
@@ -118,6 +120,9 @@
             }
             element.tabChange('demo', title);
         };
+        element.on('tab(demo)', function(data){
+            window.LYHActive=data.elem
+        });
         element.on('nav(demo)', function (elem) {
             var nav = $(elem).find('a');
             var title = $(elem).find('a').html();
@@ -130,7 +135,6 @@
             }
             addTab(title, title_url)
         });
-
     });
     /*layui.use('upload', function () {
         var $ = layui.jquery

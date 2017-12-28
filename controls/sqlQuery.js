@@ -5,7 +5,7 @@ var pool = mysql.createPool({
     port: '3306',
     database: 'shop',
     user: 'root',
-    password:'liyahao'
+    password:''
 });
 exports.db_mysql = function (sql, val) {
     return new Promise(function (resolve, reject) {

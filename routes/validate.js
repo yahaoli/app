@@ -10,4 +10,7 @@ router
     .post('/purchase/:handle',validate_ctl.platform_handle)
     .post('/platform/clear',validate_ctl.platform_clear)
     .post('/platform/submit',validate_ctl.platform_submit)
+    .post('/storeAll',validate_ctl.storeAll)
+    .post('/store',validate_ctl.store)
+    .post('/storeSet/:handle',validate_ctl.store_handle)
 module.exports = router;

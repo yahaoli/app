@@ -23,10 +23,10 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'src')));
 app.use(session({resave:false,saveUninitialized:false,secret: 'joke1', key: 'joke_key1', cookie: { httpOnly: true,maxAge: 3600000}}));
-/*app.use(function (req, res, next) {
+app.use(function (req, res, next) {
     req.session.user_id=1;
     next();
-});*/
+});
 app.use('/', index);
 app.use('/users', users);
 app.use('/validate', validate);

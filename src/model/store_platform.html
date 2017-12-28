@@ -1,0 +1,162 @@
+<style>
+    table.layui-table th, tr {
+        text-align: center
+    }
+
+    .layui-laypage {
+        margin: 0;
+    }
+
+    .menu-on {
+        cursor: pointer;
+    }
+</style>
+<div class="layui-table-box table-size" style="height: 500px;overflow: auto">
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>商品编号</th>
+            <th>商品名</th>
+            <th>成本价</th>
+            <th>售价</th>
+            <th>商品图片</th>
+            <th>商品类型</th>
+            <th>最近添加</th>
+            <th>最近清空</th>
+            <th>库存</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="store_platform">
+        </tbody>
+    </table>
+
+</div>
+<div class="lu-table-page">
+    <div id="store-page"></div>
+    <div style="position: absolute;right: 20px;top:1px">
+        <button class="layui-btn container-refresh">
+            <i class="layui-icon">&#x1002;</i>刷新
+        </button>
+    </div>
+</div>
+<script src="public/javascripts/table_size.js"></script>
+<script>
+    layui.use(['jquery', 'laypage', 'layer'], function () {
+        var layer = layui.layer, $ = layui.$;
+        var laypage = layui.laypage;
+
+        function getAll() {
+            common_.ajax_({type: 'post', url: '/validate/storeAll'}).then(function (data1) {
+                laypage.render({
+                    elem: 'store-page' //注意，这里的 test1 是 ID，不用加 # 号
+                    , count: data1.count //数据总数，从服务端得到
+                    , limit: data1.limit //数据条数
+                    , curr: 1 //当前页码
+                    , layout: ['prev', 'count', 'page', 'next', 'skip'] //设置操作栏
+                    , jump: function (obj, first) {
+                        common_.ajax_({
+                            type: 'post',
+                            url: '/validate/store',
+                            data: {page: obj.curr, limit: obj.limit}
+                        }, true).then(function (data) {
+                            var tr = '';
+                            $.each(data.data, function (index, val) {
+                                tr += '<tr>'
+                                tr += '<td>' + val.goodsid + '</td>'
+                                tr += '<td>' + val.name + '</td>'
+                                tr += '<td>' + val.price + '</td>'
+                                tr += '<td class="setPrice">' + common_.setNum(val.salePrice) + '</td>'
+                                tr += '<td><img style="width: 100px" src="public/shop/' + val.img + '" alt=""></td>'
+                                tr += '<td>' + val.type + '</td>'
+                                tr += '<td class="setTime">' + common_.setNum(val.addtime) + '</td>'
+                                tr += '<td>' + common_.setNum(val.nulltime) + '</td>'
+                                tr += '<td class="setNum">' + val.num + '</td>'
+                                tr += '<td width="160px" data-on="'+val.isSale+'"   data-price="' + val.price + '" data-id="' + val.goodsid + '">'
+                                tr += '<button  class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe642;</i></button>'
+                                if(val.num*1===0){
+                                    tr += '<button   class="layui-btn layui-btn-sm "> <i class="layui-icon">&#xe640;</i></button>'
+                                }else {
+                                    tr += '<button style="cursor: not-allowed"  disabled class="layui-btn layui-btn-sm "> <i class="layui-icon">&#xe640;</i></button>'
+                                }
+                                tr += '<img class="menu-on" src="public/images/'+val.isSale+'.png" alt=""></td>'
+                                tr += '</tr>'
+                            });
+                            $('#store_platform').html(tr)
+                        })
+                    }
+                });
+            });
+        }
+
+        getAll();
+        //刷新
+        LYHActive.find('button.container-refresh').click(function () {
+            getAll();
+        });
+        $('#store_platform').on('click','img.menu-on',function () {
+            var isSale=$(this).parent().attr('data-on')*1===1?0:1;
+            var that = $(this);
+            var msg=["确认要下架商品吗","确认要上架商品吗"]
+            layer.confirm(msg[isSale], {icon: 3, title:'提示'}, function(index1){
+                var data={id: that.parent().attr('data-id'),isSale: isSale};
+                store_set('set', data, that)
+            })
+        })
+        $('#store_platform').on('click', 'button', function () {
+            var url = $(this).next().length && $(this).prev().length ? 'delete' : 'set';
+            var that = $(this);
+            var price_init=that.parent().attr('data-price');
+            var data = {id: that.parent().attr('data-id')};
+            if (url === 'set') {
+                layer.prompt({title: '请输入售价', formType: 0}, function (num, index) {
+                    data.salePrice = num;
+                    if(!/^\d+(\.\d{1,2})?$/.test(num)){
+                        layer.msg('请输入数字(最多两位小数)',{time: 1000})
+                        return;
+                    }
+                    if(num*1<=price_init*1){
+                        layer.confirm('你确定售价不大于成本价吗?', {icon: 3, title:'提示'}, function(index1){
+                            layer.close(index1);
+                            layer.close(index);
+                            store_set(url, data, that)
+                        });
+                    }else {
+                        layer.close(index);
+                        store_set(url, data, that)
+                    }
+
+                });
+            } else {
+                layer.confirm('你确定要删除此商品吗?', {icon: 3, title:'提示'}, function(index1){
+                    layer.close(index1);
+                    store_set(url, data, that)
+                })
+            }
+        });
+
+        function store_set(url, data, that) {
+            common_.ajax_({type: 'post', url: '/validate/storeSet/' + url, data: data}).then(function (data1) {
+                layer.msg(data1.msg);
+                if (url === 'delete') {
+                    that.parent().parent().remove();
+                } else {
+                    data.isSale!==undefined?that.prop('src','public/images/'+data.isSale+'.png').parent().attr('data-on',data.isSale):that.parent().parent().find('td.setPrice').text(data.salePrice)
+                }
+            });
+            return true
+        }
+
+        $('#platform-shop').click(function () {
+            $.get('model/purchase_shop.html').then(function (data) {
+                LYHcurrentIndex.purchase_shop = layer.open({
+                    type: 1
+                    , title: '采购单'
+                    //skin: 'layui-layer-rim', //加上边框
+                    , area: ['800px', '400px'] //宽高
+                    , content: data
+                });
+            })
+        })
+    })
+</script>

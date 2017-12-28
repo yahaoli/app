@@ -1,6 +1,18 @@
 <style>
-    .purchaseShop-input{width: 40px;height: 20px;line-height: 20px;text-align: center;cursor: pointer}
-    .menu-control{background-color: #F8F8F8;overflow: hidden;border-top: 1px solid #eee;padding: 5px 0}
+    .purchaseShop-input {
+        width: 40px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        cursor: pointer
+    }
+
+    .menu-control {
+        background-color: #F8F8F8;
+        overflow: hidden;
+        border-top: 1px solid #eee;
+        padding: 5px 0
+    }
 </style>
 <div class="layui-table-box" style="height: 308px;overflow: auto">
     <table class="layui-table">
@@ -19,8 +31,16 @@
     </table>
 </div>
 <div id="purchaseShop-control" class="menu-control">
-    <button style="float: right;margin-right: 10px" class="layui-btn layui-btn-radiu">提交</button>
-    <button  class="layui-btn layui-btn-radiu">清空</button>
+    <div style="float: right;margin-right: 10px">
+        <span>种类：</span>
+        <span class="typeTotal"></span>
+        <span>数量：</span>
+        <span class="numTotal"></span>
+        <span>总价：</span>
+        <span style="padding-right: 10px" class="priceTotal"></span>
+        <button class="layui-btn layui-btn-radiu">提交</button>
+    </div>
+    <button class="layui-btn layui-btn-radiu">清空</button>
 </div>
 <script>
     layui.use(['jquery', 'layer'], function () {
@@ -33,42 +53,62 @@
                 tr += '<td>' + val.name + '</td>'
                 tr += '<td>' + val.price + '</td>'
                 tr += '<td><img style="height: 50px" src="public/shop/' + val.img + '" alt=""></td>'
-                tr += '<td>'+ val.num +'</td>'
-                tr += '<td data-id="'+val.goodsid+'"><button  class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe642;</i></button><button class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe640;</i></button></td>'
+                tr += '<td>' + val.num + '</td>'
+                tr += '<td data-price="' + val.price + '" data-id="' + val.goodsid + '"><button  class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe642;</i></button><button class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe640;</i></button></td>'
                 tr += '</tr>'
             });
             $('#purchaseShop-con').html(tr)
+            orderAll()
         });
-        $('#purchaseShop-con').on('click','button',function () {
-            var url=$(this).next().length?'set':'delete';
-            var that=$(this);
-            var data={id:that.parent().attr('data-id')};
-            if(url==='set'){
-                layer.prompt({title: '输入数量', formType: 0}, function(num, index){
-                    data.num=num;
-                    /(^[1-9]\d*$)/.test(num)?shop_set(url,data,that)&&layer.close(index):layer.msg('请输入整数');
+
+        function orderAll() {
+            var numTotal=0,priceTotal=0,typeTotal = 0;
+            typeTotal = $('#purchaseShop-con tr').length;
+            $.each($('#purchaseShop-con tr'), function (index, val) {
+                var order = $(this).find('td:last-child');
+                numTotal += order.prev().text()*1;
+                priceTotal+=order.attr('data-price') * order.prev().text()
+            })
+            $('#purchaseShop-control span.typeTotal').text(typeTotal)
+            $('#purchaseShop-control span.numTotal').text(numTotal)
+            $('#purchaseShop-control span.priceTotal').text('￥'+priceTotal.toFixed(2));
+        }
+
+        $('#purchaseShop-con').on('click', 'button', function () {
+            var url = $(this).next().length ? 'set' : 'delete';
+            var that = $(this);
+            var data = {id: that.parent().attr('data-id')};
+            if (url === 'set') {
+                layer.prompt({title: '输入数量', formType: 0}, function (num, index) {
+                    data.num = num;
+                    /(^[1-9]\d*$)/.test(num) ? shop_set(url, data, that) && layer.close(index) : layer.msg('请输入整数',{time: 1000});
                 });
-            }else {
-                shop_set(url,data,that)
+            } else {
+                shop_set(url, data, that)
             }
         });
-        function shop_set(url,data,that) {
-            common_.ajax_({type: 'post', url: '/validate/purchase/'+url,data:data}).then(function (data1) {
+
+        function shop_set(url, data, that) {
+            common_.ajax_({type: 'post', url: '/validate/purchase/' + url, data: data}).then(function (data1) {
                 layer.msg(data1.msg);
-                if(url==='delete'){
+                if (url === 'delete') {
                     that.parent().parent().remove();
-                    var num=$('#platform-num').text()*1===1?'':$('#platform-num').text()*1-1;
+                    var num = $('#platform-num').text() * 1 === 1 ? '' : $('#platform-num').text() * 1 - 1;
                     $('#platform-num').text(num)
-                }else {
+                } else {
                     that.parent().prev().html(data.num)
                 }
+                orderAll();
             });
             return true
         }
-        $('#purchaseShop-control').on('click','button',function () {
-           var url=$(this).text()==='清空'?'clear':'submit';
-            common_.ajax_({type: 'post', url: '/validate/platform/'+url}).then(function (data1) {
-                layer.msg(data1.message);
+
+        $('#purchaseShop-control').on('click', 'button', function () {
+            var url = $(this).text() === '清空' ? 'clear' : 'submit';
+            common_.ajax_({type: 'post', url: '/validate/platform/' + url}).then(function (data1) {
+                layer.close(LYHcurrentIndex.purchase_shop);
+                delete LYHcurrentIndex.purchase_shop;
+                layer.msg(data1.msg);
                 $('#purchaseShop-con,#platform-num').html('');
             })
         })

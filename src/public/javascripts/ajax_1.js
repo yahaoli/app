@@ -9,7 +9,7 @@ layui.define(['layer', 'jquery'], function () {
             $.ajax(json).then(function (data) {
                 load?layer.closeAll('loading'):'';
                 if (data.code !== 1) {
-                    layer.msg(data.message);
+                    layer.msg(data.msg);
                     def.reject()
                 }
                 def.resolve(data)
@@ -19,6 +19,10 @@ layui.define(['layer', 'jquery'], function () {
                 def.reject()
             });
             return def.promise();
+        },
+        setNum:function (data) {
+            var a=data?data:'无';
+            return a
         }
     };
 });

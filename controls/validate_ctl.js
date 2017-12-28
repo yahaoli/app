@@ -60,17 +60,65 @@ module.exports = {
     }
     , platform_submit: async function (req, res) {
         var user_id = req.session.user_id
-            ,time=format();
-        var sql_text1=`INSERT INTO store (goodsid,user,num,addtime)
-select goodsid,user,num,'${time}' FROM card where user=${user_id}
+            , time = format();
+        var sql_text1 = `INSERT INTO store (goodsid,user,num,addtime,isSale)
+select goodsid,user,num,'${time}',0 FROM card where user=${user_id}
 on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
-        var a=await sql.db_mysql(sql_text1);
+        var a = await sql.db_mysql(sql_text1);
+        await sql.db_mysql(`INSERT INTO record (goodsid,user,num,time,type) SELECT goodsid,user,num,'${time}',1 FROM card WHERE card.user=${user_id}`);
         await sql.db_mysql('DELETE FROM card where user=?', [user_id]);
-      if(a.affectedRows){
-          res.send({code: 1, message: '提交成功'})
-      }else {
-          res.send({code: 2, message: '购物车为空'})
-      }
+        if (a.affectedRows) {
+            res.send({code: 1, msg: '提交成功'})
+        } else {
+            res.send({code: 2, msg: '购物车为空'})
+        }
+    }
+    , storeAll: async function (req, res) {
+        try {
+            var user_id = req.session.user_id;
+            var count = await sql.db_mysql('select count(goodsid) as count from store where user=?', [user_id]);
+            res.send({"code": 1, "count": count[0].count, limit: 10})
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
+    , store: async function (req, res) {
+        try {
+            var start = (parseInt(req.body.page) - 1) * req.body.limit, end = parseInt(req.body.limit);
+            var data = await sql.db_mysql('SELECT store.goodsid,store.salePrice,store.num,date_format(store.nulltime,"%Y/%c/%d %h:%i:%s") as nulltime,store.isSale,date_format(store.addtime,"%Y/%c/%d %h:%i:%s") as addtime,platform.img,platform.name,platform.price,platform.type FROM store INNER JOIN platform ON store.goodsid=platform.id limit ?,?', [start, end]);
+            res.send({"code": 1, data: data})
+        } catch (err) {
+            console.log(err.message)
+        }
+
+    }
+    , store_handle: async function (req, res) {
+        var handle = req.params.handle
+            , goods_id = req.body.id
+            , user_id = req.session.user_id
+            , message = '保存成功'
+            , code = 1;
+        if (handle === 'set') {
+            var salePrice = req.body.salePrice;
+            if (salePrice) {
+                await sql.db_mysql('UPDATE store  SET salePrice=? where user=? and goodsid=?', [salePrice, user_id, goods_id]);
+            } else {
+                var a=await sql.db_mysql('UPDATE store  SET isSale=? where user=? and goodsid=? and salePrice>0', [req.body.isSale, user_id, goods_id]);
+               if(a.affectedRows*1===0){
+                   code=2;
+                   message='商品没有售价不能上架';
+               }
+            }
+        } else {
+            var b=await sql.db_mysql('DELETE FROM store where user=? and goodsid=? and num=0', [user_id, goods_id]);
+            if(b.affectedRows*1===0){
+                code=2;
+                message='不能删除库存大于0的商品';
+            }else {
+                message = '删除成功';
+            }
+        }
+        res.send({code: code, msg: message})
     }
 }
 
