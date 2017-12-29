@@ -1,16 +1,16 @@
 /*
 Navicat MySQL Data Transfer
 
-Source Server         : 127.0.0.1_3306
-Source Server Version : 50718
-Source Host           : 127.0.0.1:3306
+Source Server         : database
+Source Server Version : 50714
+Source Host           : localhost:3306
 Source Database       : shop
 
 Target Server Type    : MYSQL
-Target Server Version : 50718
+Target Server Version : 50714
 File Encoding         : 65001
 
-Date: 2017-12-24 12:02:15
+Date: 2017-12-29 17:53:29
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -27,6 +27,7 @@ CREATE TABLE `card` (
   UNIQUE KEY `card_index3` (`goodsid`,`user`),
   KEY `card_index1` (`goodsid`) USING BTREE,
   KEY `card_index2` (`user`) USING BTREE,
+  KEY `card_index4` (`addtime`) USING BTREE,
   CONSTRAINT `card_ibfk_1` FOREIGN KEY (`user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `card_ibfk_2` FOREIGN KEY (`goodsid`) REFERENCES `platform` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
@@ -34,6 +35,7 @@ CREATE TABLE `card` (
 -- ----------------------------
 -- Records of card
 -- ----------------------------
+INSERT INTO `card` VALUES ('4', '2', '2017-12-26 09:33:02', '1');
 
 -- ----------------------------
 -- Table structure for platform
@@ -85,16 +87,27 @@ CREATE TABLE `record` (
   `time` datetime NOT NULL,
   `num` int(11) unsigned NOT NULL,
   `user` int(10) unsigned NOT NULL,
+  `type` int(1) unsigned NOT NULL,
   KEY `record_index1` (`goodsid`) USING BTREE,
   KEY `record_index2` (`time`) USING BTREE,
   KEY `record_index4` (`num`) USING BTREE,
   KEY `record_key1` (`user`),
+  KEY `record_index3` (`type`) USING BTREE,
   CONSTRAINT `record_key1` FOREIGN KEY (`user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of record
 -- ----------------------------
+INSERT INTO `record` VALUES ('1', '2017-12-26 10:01:34', '1', '1', '1');
+INSERT INTO `record` VALUES ('4', '2017-12-26 10:01:34', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2017-12-26 14:31:30', '1', '1', '1');
+INSERT INTO `record` VALUES ('4', '2017-12-26 14:31:30', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2017-12-28 18:11:39', '1', '1', '1');
+INSERT INTO `record` VALUES ('4', '2017-12-28 18:11:39', '1', '1', '1');
+INSERT INTO `record` VALUES ('6', '2017-12-28 18:11:39', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2017-12-29 09:51:41', '22', '1', '1');
+INSERT INTO `record` VALUES ('4', '2017-12-29 09:51:41', '22', '1', '1');
 
 -- ----------------------------
 -- Table structure for store
@@ -106,22 +119,22 @@ CREATE TABLE `store` (
   `addtime` datetime DEFAULT NULL,
   `nulltime` datetime DEFAULT NULL,
   `user` int(10) unsigned NOT NULL,
+  `isSale` int(2) NOT NULL,
+  `salePrice` float(10,2) unsigned DEFAULT NULL,
   UNIQUE KEY `store_index3` (`goodsid`,`user`),
   KEY `store_index1` (`addtime`) USING BTREE,
   KEY `store_index2` (`nulltime`) USING BTREE,
   KEY `store_key1` (`user`),
+  KEY `store_index4` (`isSale`) USING BTREE,
   CONSTRAINT `store_key1` FOREIGN KEY (`user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of store
 -- ----------------------------
-INSERT INTO `store` VALUES ('1', '214', '2017-12-23 14:00:17', null, '1');
-INSERT INTO `store` VALUES ('1', '101', '2017-12-23 13:40:30', null, '2');
-INSERT INTO `store` VALUES ('4', '114', '2017-12-23 14:00:17', null, '1');
-INSERT INTO `store` VALUES ('4', '101', '2017-12-23 13:40:30', null, '2');
-INSERT INTO `store` VALUES ('5', '113', '2017-12-23 13:56:25', null, '1');
-INSERT INTO `store` VALUES ('5', '101', '2017-12-23 13:40:30', null, '2');
+INSERT INTO `store` VALUES ('1', '22', '2017-12-29 09:51:41', null, '1', '0', null);
+INSERT INTO `store` VALUES ('4', '23', '2017-12-29 09:51:41', null, '1', '0', null);
+INSERT INTO `store` VALUES ('6', '1', '2017-12-28 18:11:39', null, '1', '0', null);
 
 -- ----------------------------
 -- Table structure for user
