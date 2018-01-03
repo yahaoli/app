@@ -105,6 +105,10 @@
 
         $('#purchaseShop-control').on('click', 'button', function () {
             var url = $(this).text() === '清空' ? 'clear' : 'submit';
+            if(!$('#purchaseShop-con').find('tr').length){
+                layer.msg("购物车为空");
+                return;
+            }
             common_.ajax_({type: 'post', url: '/validate/platform/' + url}).then(function (data1) {
                 layer.close(LYHcurrentIndex.purchase_shop);
                 delete LYHcurrentIndex.purchase_shop;

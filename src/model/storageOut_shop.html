@@ -55,7 +55,7 @@
                 tr += '<td>' + val.price + '</td>'
                 tr += '<td><img style="height: 50px" src="public/shop/' + val.img + '" alt=""></td>'
                 tr += '<td>' + val.num + '</td>'
-                tr += '<td>' + val.shopNum + '</td>'
+                tr += '<td data-num="'+ val.num +'" class="num-compare">' + val.shopNum + '</td>'
                 tr += '<td data-price="' + val.price + '" data-id="' + val.goodsid + '"><button  class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe642;</i></button><button class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe640;</i></button></td>'
                 tr += '</tr>'
             });
@@ -107,7 +107,19 @@
 
         $('#storageOut_shop-control').on('click', 'button', function () {
             var url = $(this).text() === '清空' ? 'clear' : 'submit';
+            var tr_=$('#storageOut_shop-con').find('tr');
+            if(!tr_.length){
+                layer.msg("购物车为空");
+                return;
+            }
+            for(var i=0;i<tr_.length;i++){
+                if(tr_.find('.num-compare').text()>tr_.find('.num-compare').attr('data-num')){
+                    layer.msg("有库存不足的商品");
+                    return;
+                }
+            }
             common_.ajax_({type: 'post', url: '/validate/storageOut/' + url}).then(function (data1) {
+                LYHActive.find('button.container-refresh').click();
                 layer.close(LYHcurrentIndex.storage_out);
                 delete LYHcurrentIndex.storage_out;
                 layer.msg(data1.msg);
