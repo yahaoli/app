@@ -17,7 +17,7 @@ router
     .post('/storageOut',validate_ctl.storageOut)
     .post('/storageOut/add',validate_ctl.storageOut_add)
     .post('/storageOut/shop',validate_ctl.storageOut_shop)
-    .post('/storageOut/:handle',validate_ctl.storageOut_handle)
+    .post('/storageOutSet/:handle',validate_ctl.storageOut_handle)
     .post('/storageOut/clear',validate_ctl.storageOut_clear)
     .post('/storageOut/submit',validate_ctl.storageOut_submit)
 module.exports = router;

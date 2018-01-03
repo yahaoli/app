@@ -16,6 +16,7 @@
             <th>商品价格</th>
             <th>商品类型</th>
             <th>商品图片</th>
+            <th>库存量</th>
             <th>操作</th>
         </tr>
         </thead>
@@ -65,6 +66,7 @@
                                 tr += '<td>' + val.salePrice + '</td>'
                                 tr += '<td>' + val.type + '</td>'
                                 tr += '<td><img style="width: 100px" src="public/shop/' + val.img + '" alt=""></td>'
+                                tr += '<td>' + val.num + '</td>'
                                 tr += '<td> <i data-id="' + val.goodsid + '" lay-event="add" class="layui-icon" style="cursor: pointer;font-size: 22px; color: #1E9FFF;">&#xe608;</i></td>'
                                 tr += '</tr>'
                             });

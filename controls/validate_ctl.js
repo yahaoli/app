@@ -86,7 +86,7 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
         try {
             var user_id = req.session.user_id;
             var start = (parseInt(req.body.page) - 1) * req.body.limit, end = parseInt(req.body.limit);
-            var data = await sql.db_mysql('SELECT store.goodsid,store.salePrice,store.num,date_format(store.nulltime,"%Y/%c/%d %h:%i:%s") as nulltime,store.isSale,date_format(store.addtime,"%Y/%c/%d %h:%i:%s") as addtime,platform.img,platform.name,platform.price,platform.type FROM store INNER JOIN platform ON store.goodsid=platform.id where store.user=? limit ?,?', [user_id,start, end]);
+            var data = await sql.db_mysql('SELECT store.goodsid,store.salePrice,store.num,date_format(store.nulltime,"%Y/%c/%d %h:%i:%s") as nulltime,store.isSale,date_format(store.addtime,"%Y/%c/%d %h:%i:%s") as addtime,platform.img,platform.name,platform.price,platform.type FROM store INNER JOIN platform ON store.goodsid=platform.id where store.user=? limit ?,?', [user_id, start, end]);
             res.send({"code": 1, data: data})
         } catch (err) {
             console.log(err.message)
@@ -135,7 +135,7 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
         try {
             var user_id = req.session.user_id;
             var start = (parseInt(req.body.page) - 1) * req.body.limit, end = parseInt(req.body.limit);
-            var data = await sql.db_mysql('SELECT store.goodsid,store.salePrice,store.num,platform.img,platform.name,platform.type FROM store INNER JOIN platform ON store.goodsid=platform.id where store.user=? and isSale=1 and num>0 limit ?,?', [user_id,start,end]);
+            var data = await sql.db_mysql('SELECT store.goodsid,store.salePrice,store.num,platform.img,platform.name,platform.type FROM store INNER JOIN platform ON store.goodsid=platform.id where store.user=? and isSale=1 and num>0 limit ?,?', [user_id, start, end]);
             res.send({"code": 1, data: data})
         } catch (err) {
             console.log(err.message)
@@ -153,8 +153,8 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
     }
     , storageOut_shop: async function (req, res) {
         try {
-            var sql_text = 'select card.goodsid,card.num,platform.name,platform.price,platform.img from card\n' +
-                'inner join platform on card.goodsid =platform.id WHERE card.user=? and card.type=2 ORDER BY card.addtime desc'
+            var sql_text = 'select card.goodsid,card.num as shopNum,store.num,platform.name,platform.price,platform.img from card\n' +
+                'inner join platform on card.goodsid =platform.id inner join store on card.goodsid =store.goodsid and card.user=store.user WHERE card.user=? and card.type=2 ORDER BY card.addtime desc'
             var shop = await sql.db_mysql(sql_text, [req.session.user_id]);
             res.send({code: 1, data: shop})
         } catch (err) {
@@ -176,17 +176,17 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
         res.send({code: 1, msg: message})
     }
     , storageOut_clear: async function (req, res) {
-        await sql.db_mysql('DELETE FROM card where user=? and type=2', [req.session.user_id]);
+        var a = await sql.db_mysql('DELETE FROM card where user=? and type=2', [req.session.user_id]);
+        console.log(a);
         res.send({code: 1, msg: '已清空'})
     }
     , storageOut_submit: async function (req, res) {
         var user_id = req.session.user_id
             , time = format();
         var sql_text1 = `UPDATE store INNER JOIN (SELECT goodsid,user,num FROM card WHERE type=2 and user=${user_id}) c 
-                         SET store.num=store.num-c.num,store.nulltime= (CASE WHEN store.num-c.num=0 THEN ${time} END)
+                         SET store.num=store.num-c.num,store.nulltime= (CASE WHEN store.num-c.num=0 THEN '${time}' END)
                         WHERE c.goodsid=store.goodsid AND c.user=store.user`;
         var a = await sql.db_mysql(sql_text1);
-        console.log(a);
         if (a.affectedRows) {
             await sql.db_mysql(`INSERT INTO record (goodsid,user,num,time,type) SELECT goodsid,user,num,'${time}',2 FROM card WHERE card.user=${user_id} and card.type=2`);
             await sql.db_mysql('DELETE FROM card where user=? and type=2', [user_id]);
