@@ -1,0 +1,117 @@
+<style>
+    .purchaseShop-input {
+        width: 40px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        cursor: pointer
+    }
+
+    .menu-control {
+        background-color: #F8F8F8;
+        overflow: hidden;
+        border-top: 1px solid #eee;
+        padding: 5px 0
+    }
+</style>
+<div class="layui-table-box" style="height: 308px;overflow: auto">
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>商品编号</th>
+            <th>商品名</th>
+            <th>商品价格</th>
+            <th>商品图片</th>
+            <th>商品数量</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="storageOut_shop-con">
+        </tbody>
+    </table>
+</div>
+<div id="storageOut_shop-control" class="menu-control">
+    <div style="float: right;margin-right: 10px">
+        <span>种类：</span>
+        <span class="typeTotal"></span>
+        <span>数量：</span>
+        <span class="numTotal"></span>
+        <span>总价：</span>
+        <span style="padding-right: 10px" class="priceTotal"></span>
+        <button class="layui-btn layui-btn-radiu">提交</button>
+    </div>
+    <button class="layui-btn layui-btn-radiu">清空</button>
+</div>
+<script>
+    layui.use(['jquery', 'layer'], function () {
+        var layer = layui.layer, $ = layui.$;
+        common_.ajax_({type: 'post', url: '/validate/storageOut/shop'}).then(function (data1) {
+            var tr = '';
+            $.each(data1.data, function (index, val) {
+                tr += '<tr>'
+                tr += '<td>' + val.goodsid + '</td>'
+                tr += '<td>' + val.name + '</td>'
+                tr += '<td>' + val.price + '</td>'
+                tr += '<td><img style="height: 50px" src="public/shop/' + val.img + '" alt=""></td>'
+                tr += '<td>' + val.num + '</td>'
+                tr += '<td data-price="' + val.price + '" data-id="' + val.goodsid + '"><button  class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe642;</i></button><button class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe640;</i></button></td>'
+                tr += '</tr>'
+            });
+            $('#storageOut_shop-con').html(tr)
+            orderAll()
+        });
+
+        function orderAll() {
+            var numTotal=0,priceTotal=0,typeTotal = 0;
+            typeTotal = $('#storageOut_shop-con tr').length;
+            $.each($('#storageOut_shop-con tr'), function (index, val) {
+                var order = $(this).find('td:last-child');
+                numTotal += order.prev().text()*1;
+                priceTotal+=order.attr('data-price') * order.prev().text()
+            })
+            $('#storageOut_shop-control span.typeTotal').text(typeTotal)
+            $('#storageOut_shop-control span.numTotal').text(numTotal)
+            $('#storageOut_shop-control span.priceTotal').text('￥'+priceTotal.toFixed(2));
+        }
+
+        $('#storageOut_shop-con').on('click', 'button', function () {
+            var url = $(this).next().length ? 'set' : 'delete';
+            var that = $(this);
+            var data = {id: that.parent().attr('data-id')};
+            if (url === 'set') {
+                layer.prompt({title: '输入数量', formType: 0}, function (num, index) {
+                    data.num = num;
+                    /(^[1-9]\d*$)/.test(num) ? shop_set(url, data, that) && layer.close(index) : layer.msg('请输入整数',{time: 1000});
+                });
+            } else {
+                shop_set(url, data, that)
+            }
+        });
+
+        function shop_set(url, data, that) {
+            common_.ajax_({type: 'post', url: '/validate/purchase/' + url, data: data}).then(function (data1) {
+                layer.msg(data1.msg);
+                if (url === 'delete') {
+                    that.parent().parent().remove();
+                    var num = $('#storage_out-num').text() * 1 === 1 ? '' : $('#platform-num').text() * 1 - 1;
+                    $('#storage_out-num').text(num)
+                } else {
+                    that.parent().prev().html(data.num)
+                }
+                orderAll();
+            });
+            return true
+        }
+
+        $('#storageOut_shop-control').on('click', 'button', function () {
+            var url = $(this).text() === '清空' ? 'clear' : 'submit';
+            common_.ajax_({type: 'post', url: '/validate/platform/' + url}).then(function (data1) {
+                layer.close(LYHcurrentIndex.storage_out);
+                delete LYHcurrentIndex.storage_out;
+                layer.msg(data1.msg);
+                $('#storageOut_shop-con,#storage_out-num').html('');
+            })
+        })
+
+    })
+</script>

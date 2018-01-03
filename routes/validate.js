@@ -13,4 +13,11 @@ router
     .post('/storeAll',validate_ctl.storeAll)
     .post('/store',validate_ctl.store)
     .post('/storeSet/:handle',validate_ctl.store_handle)
+    .post('/storageOutAll',validate_ctl.storageOutAll)
+    .post('/storageOut',validate_ctl.storageOut)
+    .post('/storageOut/add',validate_ctl.storageOut_add)
+    .post('/storageOut/shop',validate_ctl.storageOut_shop)
+    .post('/storageOut/:handle',validate_ctl.storageOut_handle)
+    .post('/storageOut/clear',validate_ctl.storageOut_clear)
+    .post('/storageOut/submit',validate_ctl.storageOut_submit)
 module.exports = router;
