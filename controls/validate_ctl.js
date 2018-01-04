@@ -182,7 +182,7 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
     }
     , storageOut_submit: async function (req, res) {
         var user_id = req.session.user_id
-            , time = format();
+            , time = format(),type=req.body.type;
         var a = await sql.db_mysql(`select card.goodsid,card.num as shopNum,store.num,platform.name,platform.price,platform.img from card inner join platform on card.goodsid =platform.id inner join store on card.goodsid =store.goodsid and card.user=store.user WHERE card.user=${user_id} and card.type=2 ORDER BY card.addtime desc`)
         if (!a.length) {
             res.send({code: 2, msg: '购物车为空'});
@@ -198,7 +198,7 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
                          SET store.num=store.num-c.num,store.nulltime= (CASE WHEN store.num-c.num=0 THEN '${time}' END)
                         WHERE c.goodsid=store.goodsid AND c.user=store.user`;
         await sql.db_mysql(sql_text1);
-        await sql.db_mysql(`INSERT INTO record (goodsid,user,num,time,type) SELECT goodsid,user,num,'${time}',2 FROM card WHERE card.user=${user_id} and card.type=2`);
+        await sql.db_mysql(`INSERT INTO record (goodsid,user,num,time,type) SELECT goodsid,user,num,'${time}',${type} FROM card WHERE card.user=${user_id} and card.type=2`);
         await sql.db_mysql('DELETE FROM card where user=? and type=2', [user_id]);
         res.send({code: 1, msg: '提交成功'})
 

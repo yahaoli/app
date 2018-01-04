@@ -39,6 +39,11 @@
         <span class="numTotal"></span>
         <span>总价：</span>
         <span style="padding-right: 10px" class="priceTotal"></span>
+        <label>类别:</label>
+        <select style="height: 30px;padding:0 5px;vertical-align: middle;border: none;background-color: #009688;color: white" name="city">
+            <option value="2">销售</option>
+            <option value="3">耗损</option>
+        </select>
         <button class="layui-btn layui-btn-radiu">提交</button>
     </div>
     <button class="layui-btn layui-btn-radiu">清空</button>
@@ -118,7 +123,7 @@
                     return;
                 }
             }
-            common_.ajax_({type: 'post', url: '/validate/storageOut/' + url}).then(function (data1) {
+            common_.ajax_({type: 'post', url: '/validate/storageOut/' + url,data:{type:$('#storageOut_shop-control select').val()}}).then(function (data1) {
                 LYHActive.find('button.container-refresh').click();
                 layer.close(LYHcurrentIndex.storage_out);
                 delete LYHcurrentIndex.storage_out;
