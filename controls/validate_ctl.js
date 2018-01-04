@@ -153,7 +153,7 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
     }
     , storageOut_shop: async function (req, res) {
         try {
-            var sql_text = 'select card.goodsid,card.num as shopNum,store.num,platform.name,platform.price,platform.img from card\n' +
+            var sql_text = 'select card.goodsid,card.num as shopNum,store.num,platform.name,store.salePrice,platform.img from card\n' +
                 'inner join platform on card.goodsid =platform.id inner join store on card.goodsid =store.goodsid and card.user=store.user WHERE card.user=? and card.type=2 ORDER BY card.addtime desc'
             var shop = await sql.db_mysql(sql_text, [req.session.user_id]);
             res.send({code: 1, data: shop})

@@ -52,11 +52,11 @@
                 tr += '<tr>'
                 tr += '<td>' + val.goodsid + '</td>'
                 tr += '<td>' + val.name + '</td>'
-                tr += '<td>' + val.price + '</td>'
+                tr += '<td>' + val.salePrice + '</td>'
                 tr += '<td><img style="height: 50px" src="public/shop/' + val.img + '" alt=""></td>'
                 tr += '<td>' + val.num + '</td>'
                 tr += '<td data-num="'+ val.num +'" class="num-compare">' + val.shopNum + '</td>'
-                tr += '<td data-price="' + val.price + '" data-id="' + val.goodsid + '"><button  class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe642;</i></button><button class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe640;</i></button></td>'
+                tr += '<td data-price="' + val.salePrice + '" data-id="' + val.goodsid + '"><button  class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe642;</i></button><button class="layui-btn layui-btn-sm"> <i class="layui-icon">&#xe640;</i></button></td>'
                 tr += '</tr>'
             });
             $('#storageOut_shop-con').html(tr)
@@ -113,7 +113,7 @@
                 return;
             }
             for(var i=0;i<tr_.length;i++){
-                if(tr_.find('.num-compare').text()>tr_.find('.num-compare').attr('data-num')){
+                if(tr_.eq(i).find('.num-compare').text()*1>tr_.eq(i).find('.num-compare').attr('data-num')*1){
                     layer.msg("有库存不足的商品");
                     return;
                 }
