@@ -124,7 +124,7 @@
                 }
             }
             common_.ajax_({type: 'post', url: '/validate/storageOut/' + url,data:{type:$('#storageOut_shop-control select').val()}}).then(function (data1) {
-                LYHActive.find('button.container-refresh').click();
+                $('#storage_out-page').next().find('button.container-refresh').click();
                 layer.close(LYHcurrentIndex.storage_out);
                 delete LYHcurrentIndex.storage_out;
                 layer.msg(data1.msg);

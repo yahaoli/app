@@ -86,7 +86,7 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
         try {
             var user_id = req.session.user_id;
             var start = (parseInt(req.body.page) - 1) * req.body.limit, end = parseInt(req.body.limit);
-            var data = await sql.db_mysql('SELECT store.goodsid,store.salePrice,store.num,date_format(store.nulltime,"%Y/%c/%d %h:%i:%s") as nulltime,store.isSale,date_format(store.addtime,"%Y/%c/%d %h:%i:%s") as addtime,platform.img,platform.name,platform.price,platform.type FROM store INNER JOIN platform ON store.goodsid=platform.id where store.user=? limit ?,?', [user_id, start, end]);
+            var data = await sql.db_mysql('SELECT store.goodsid,store.salePrice,store.num,date_format(store.nulltime,"%Y/%m/%d %H:%i:%s") as nulltime,store.isSale,date_format(store.addtime,"%Y/%m/%d %H:%i:%s") as addtime,platform.img,platform.name,platform.price,platform.type FROM store INNER JOIN platform ON store.goodsid=platform.id where store.user=? limit ?,?', [user_id, start, end]);
             res.send({"code": 1, data: data})
         } catch (err) {
             console.log(err.message)
@@ -111,13 +111,21 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
                 }
             }
         } else {
-            var b = await sql.db_mysql('DELETE FROM store where user=? and goodsid=? and num=0 and isSale=0', [user_id, goods_id]);
-            if (b.affectedRows * 1 === 0) {
-                code = 2;
-                message = '不能删除库存大于0或者未下架的商品';
+            var c = await sql.db_mysql('SELECT COUNT(goodsid) as count FROM record WHERE user=? AND goodsid=?', [user_id, goods_id]);
+            if(c[0].count*1===0){
+                var b = await sql.db_mysql('DELETE FROM store where user=? and goodsid=? and num=0 and isSale=0', [user_id, goods_id]);
+                if (b.affectedRows * 1 === 0) {
+                    code = 2;
+                    message = '不能删除库存大于0或者未下架的商品';
+                }else {
+                    code=1;
+                    message='删除成功'
+                }
             } else {
-                message = '删除成功';
+                code=2;
+                message='此商品有关联的订单不能删除'
             }
+
         }
         res.send({code: code, msg: message})
     }
@@ -182,7 +190,7 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
     }
     , storageOut_submit: async function (req, res) {
         var user_id = req.session.user_id
-            , time = format(),type=req.body.type;
+            , time = format(), type = req.body.type;
         var a = await sql.db_mysql(`select card.goodsid,card.num as shopNum,store.num,platform.name,platform.price,platform.img from card inner join platform on card.goodsid =platform.id inner join store on card.goodsid =store.goodsid and card.user=store.user WHERE card.user=${user_id} and card.type=2 ORDER BY card.addtime desc`)
         if (!a.length) {
             res.send({code: 2, msg: '购物车为空'});
@@ -202,6 +210,59 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
         await sql.db_mysql('DELETE FROM card where user=? and type=2', [user_id]);
         res.send({code: 1, msg: '提交成功'})
 
+    }
+    , saleAll: async function (req, res) {
+        try {
+            var user_id = req.session.user_id;
+            var order = await sql.db_mysql('select count(*) as count from (SELECT type FROM record WHERE user=? GROUP BY time,type) u', [user_id]);
+            res.send({"code": 1, "count": order[0].count, limit: 10})
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
+    , saleList: async function (req, res) {
+        try {
+            var user_id = req.session.user_id, start = (parseInt(req.body.page) - 1) * req.body.limit,
+                end = parseInt(req.body.limit);
+            var data = await sql.db_mysql('SELECT date_format(time,"%Y/%m/%d %H:%i:%s") as time,UNIX_TIMESTAMP(time) as orderNum,type FROM record WHERE user=? GROUP BY time,type ORDER BY time DESC LIMIT ?,?', [user_id, start, end]);
+            res.send({"code": 1, data: data})
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
+    , saleDetail: async function (req, res) {
+        var user_id = req.session.user_id,order = req.body.order;
+        var sql_text = `SELECT record.goodsid,date_format(record.time,"%Y/%m/%d %H:%i:%s") as time,record.num,record.type as orderType,platform.name,platform.price as price,platform.type,platform.img,store.salePrice FROM record 
+inner join platform on record.goodsid =platform.id 
+inner join store on record.goodsid =store.goodsid and record.user=store.user
+WHERE record.time='${order}' AND record.user=${user_id}`;
+        var data=await  sql.db_mysql(sql_text)
+        res.send({"code": 1, data: data})
+    }
+    ,sale_handle: async function (req, res) {
+        var handle = req.params.handle
+            , user_id = req.session.user_id
+            , order = req.body.order
+            , orderType = req.body.orderType*1
+            ,time=format()
+            ,message;
+        var sql_text = `INSERT INTO store (goodsid,user,num,addtime,isSale)
+select record.goodsid,user,num,'${time}',0 FROM record where user=${user_id} and time='${order}'
+on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num`
+        if(handle==='delete'){
+            message='撤销成功';
+            if(orderType===2||orderType===3){
+                await sql.db_mysql(sql_text);
+                await sql.db_mysql('DELETE FROM record where user=? AND time=?',[user_id,order])
+            }else {
+                await sql.db_mysql('DELETE FROM record where user=? AND time=?',[user_id,order])
+            }
+        }else {
+            await sql.db_mysql(sql_text)
+            await sql.db_mysql('UPDATE record SET type=4 WHERE user=? AND time=?',[user_id,order])
+            message='退货成功'
+        }
+        res.send({"code": 1, msg: message})
     }
 }
 

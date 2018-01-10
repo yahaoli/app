@@ -1,0 +1,32 @@
+<div class="layui-table-box table-size" style="height: 500px;overflow: auto">
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>商品编号</th>
+            <th>商品名</th>
+            <th>商品价格</th>
+            <th>商品类型</th>
+            <th>商品图片</th>
+            <th>商品数量</th>
+            <th>合计</th>
+        </tr>
+        </thead>
+        <tbody id="sale-list">
+        </tbody>
+    </table>
+</div>
+<div class="lu-table-page" style="text-align: right;padding: 1px 1px">
+    <button style="display: none" id="saleList-exit" class="layui-btn container-refresh">
+        退货
+    </button>
+    <button style="display: none" id="saleList-back" class="layui-btn container-refresh">
+        撤销
+    </button>
+</div>
+<script src="public/javascripts/table_size.js"></script>
+<script>
+    layui.use(['jquery', 'layer'], function () {
+        var layer = layui.layer, $ = layui.$;
+
+    })
+</script>

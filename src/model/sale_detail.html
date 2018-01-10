@@ -1,0 +1,150 @@
+<style>
+    table.layui-table th, tr {
+        text-align: center
+    }
+
+    .layui-laypage {
+        margin: 0;
+    }
+
+    .menu-on {
+        cursor: pointer;
+    }
+</style>
+<div class="layui-table-box table-size" style="height: 500px;overflow: auto">
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>序号</th>
+            <th>订单编号</th>
+            <th>订单时间</th>
+            <th>订单类型</th>
+        </tr>
+        </thead>
+        <tbody id="sale-detail">
+        </tbody>
+    </table>
+
+</div>
+<div class="lu-table-page">
+    <div id="sale-detail-page"></div>
+    <div style="position: absolute;right: 20px;top:1px">
+        <button class="layui-btn container-refresh">
+            <i class="layui-icon">&#x1002;</i>刷新
+        </button>
+    </div>
+</div>
+<script src="public/javascripts/table_size.js"></script>
+<script>
+    layui.use(['jquery', 'laypage', 'layer'], function () {
+        var layer = layui.layer, $ = layui.$;
+        var laypage = layui.laypage;
+        var a = ["购买", "销售", "损耗", "退货"];
+
+        function getAll() {
+            common_.ajax_({type: 'post', url: '/validate/saleAll'}).then(function (data1) {
+                laypage.render({
+                    elem: 'sale-detail-page' //注意，这里的 test1 是 ID，不用加 # 号
+                    , count: data1.count //数据总数，从服务端得到
+                    , limit: data1.limit //数据条数
+                    , curr: 1 //当前页码
+                    , layout: ['prev', 'count', 'page', 'next', 'skip'] //设置操作栏
+                    , jump: function (obj, first) {
+                        common_.ajax_({
+                            type: 'post',
+                            url: '/validate/saleList',
+                            data: {page: obj.curr, limit: obj.limit}
+                        }, true).then(function (data) {
+                            var tr = '';
+                            $.each(data.data, function (index, val) {
+                                tr += '<tr>'
+                                tr += '<td>' + ((obj.curr - 1) * 10 + index * 1 + 1) + '</td>'
+                                tr += '<td class="order" data-order="' + val.time + '" style="cursor: pointer">' + val.orderNum + '</td>'
+                                tr += '<td>' + val.time + '</td>'
+                                tr += '<td>' + a[val.type * 1 - 1] + '</td>'
+                                tr += '</tr>'
+                            });
+                            $('#sale-detail').html(tr)
+                        })
+                    }
+                });
+            });
+        }
+        getAll()
+        //刷新
+        $('#sale-detail-page').next().find('button.container-refresh').click(function () {
+            getAll()
+        });
+        $('#sale-detail').on('click', 'td.order', function () {
+            var order = $(this).attr('data-order');
+            addTab('订单详情', 'model/sale_list.html').then(function () {
+                common_.ajax_({
+                    type: 'post',
+                    url: '/validate/saleDetail',
+                    data: {order: order}
+                }, true).then(function (data) {
+                    var tr = '';
+                    var length = data.data.length, countNum = 0, coutPrice = 0;
+                    var order_type = data.data[0].orderType * 1 === 1 ? 'price' : 'salePrice';
+                    var orderType = data.data[0].orderType, orderTime = data.data[0].time;
+                    $.each(data.data, function (index, val) {
+                        countNum += val.num * 1;
+                        coutPrice += val.num * val[order_type];
+                        tr += '<tr>'
+                        tr += '<td>' + val.goodsid + '</td>'
+                        tr += '<td>' + val.name + '</td>'
+                        tr += '<td>' + val[order_type] + '</td>'
+                        tr += '<td>' + val.type + '</td>'
+                        tr += '<td><img style="width: 100px" src="public/shop/' + val.img + '" alt=""></td>'
+                        tr += '<td>' + val.num + '</td>'
+                        if (index * 1 === 0) {
+                            tr += '<td class="count" rowspan="' + length + '"></td>'
+                        }
+                        tr += '</tr>'
+                    });
+                    $('#saleList-exit').parent().show();
+                    if (orderType * 1 === 1) {
+                        $('#saleList-exit').parent().hide()
+                    }
+                    if (orderType * 1 === 2) {
+                        $('#saleList-exit,#saleList-back').show()
+                    }
+                    if (orderType * 1 === 3 || orderType * 1 === 4) {
+                        $('#saleList-back').show()
+                    }
+                    $('#sale-list').html(tr).find('td.count').html('订单类型:' + a[orderType * 1 - 1] + '<br>' +
+                        '订单种类:' + length + '种<br>' +
+                        '订单时间:' + orderTime + '<br>' +
+                        '订单数量:' + countNum + '个<br>' +
+                        '订单总额:' + coutPrice.toFixed(2) + '元')
+                    $('#saleList-exit').click(function () {
+                        layer.confirm('你确定要退货这个订单吗', {icon: 3, title: '提示'}, function (index1) {
+                            common_.ajax_({
+                                type: 'post',
+                                url: '/validate/saleSet/update',
+                                data: {order: order}
+                            }).then(function (order) {
+                                layer.msg(order.msg)
+                                delTab('订单详情')
+                                getAll();
+                            })
+                        })
+                    });
+                    $('#saleList-back').click(function () {
+                        layer.confirm('订单撤销不可恢复', {icon: 3, title: '提示'}, function (index1) {
+                            common_.ajax_({
+                                type: 'post',
+                                url: '/validate/saleSet/delete',
+                                data: {order: order, orderType:orderType}
+                            }, true).then(function (order) {
+                                layer.msg(order.msg)
+                                delTab('订单详情')
+                                getAll();
+                            })
+                        })
+                    })
+                })
+            })
+        })
+    })
+</script>

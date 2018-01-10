@@ -20,4 +20,8 @@ router
     .post('/storageOutSet/:handle',validate_ctl.storageOut_handle)
     .post('/storageOut/clear',validate_ctl.storageOut_clear)
     .post('/storageOut/submit',validate_ctl.storageOut_submit)
+    .post('/saleAll',validate_ctl.saleAll)
+    .post('/saleList',validate_ctl.saleList)
+    .post('/saleDetail',validate_ctl.saleDetail)
+    .post('/saleSet/:handle',validate_ctl.sale_handle)
 module.exports = router;

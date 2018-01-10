@@ -88,11 +88,10 @@
                 });
             });
         }
-
-        getAll();
+        getAll()
         //刷新
-        LYHActive.find('button.container-refresh').click(function () {
-            getAll();
+        $('#store-page').next().find('button.container-refresh').click(function () {
+            getAll()
         });
         $('#store_platform').on('click','img.menu-on',function () {
             var isSale=$(this).parent().attr('data-on')*1===1?0:1;

@@ -76,11 +76,11 @@
                 });
             });
         }
-        getAll();
+        getAll()
         //刷新
-        LYHActive.find('button.container-refresh').click(function () {
-            getAll();
-        })
+        $('#storage_out-page').next().find('button.container-refresh').click(function () {
+            getAll()
+        });
         $('#storage_out').on('click','.layui-icon',function () {
             common_.ajax_({type: 'post', url: '/validate/storageOut/add',data:{id:$(this).attr('data-id')}}).then(function (data1) {
                 layer.msg(data1.msg);
