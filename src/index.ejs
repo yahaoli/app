@@ -11,6 +11,13 @@
             padding: 5px 0 0 5px;
             border: solid 1px #e6e6e6
         }
+         table.layui-table th, tr {
+             text-align: center
+         }
+
+        .layui-laypage {
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -56,7 +63,7 @@
                 <li class="layui-nav-item">
                     <a class="" href="javascript:;">货品分析</a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;">进货分析</a></dd>
+                        <dd><a href="javascript:;" title="model/buy_analysis.html">进货分析</a></dd>
                         <dd><a href="javascript:;">出货分析</a></dd>
                         <dd><a href="javascript:;">财务分析</a></dd>
                     </dl>
@@ -88,10 +95,19 @@
             var layId = $(this).parent().attr('lay-id');
             delTab(layId)
         });
+        element.on('tab(demo)', function(){
+            $(window).resize()
+        });
         window.delTab = function (layId) {
             var index = tab.indexOf(layId);
             tab.splice(index, 1);
             element.tabDelete('demo', layId);
+        };
+        $(window).on('resize',table_size);
+        function table_size(){
+            var prev_=$('.layui-show').find('div.table-size').prev('form').length>0?$('.layui-show').find('div.table-size').prev('form').innerHeight()*1+8:0;
+            $('.table-size').height(parseInt($(window).height())-190-prev_+'px');
+            $('.table-size').height(parseInt($(window).height())-190-prev_+'px')
         }
         window.addTab = function (title, title_url) {
             var index = tab.indexOf(title);

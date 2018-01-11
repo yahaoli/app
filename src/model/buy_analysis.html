@@ -1,0 +1,94 @@
+<div id="buy-analysis">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">日期</label>
+                <div class="layui-input-inline" style="width: 200px;">
+                    <input readonly type="text"  name="time" lay-verify="required" class="layui-input  time-select">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <button class="layui-btn" lay-submit lay-filter="buyDemo">查询</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="layui-table-box table-size" style="height: 500px;overflow: auto">
+        <table class="layui-table" >
+            <thead>
+            <tr>
+                <th>商品编号</th>
+                <th>商品名</th>
+                <th>商品价格</th>
+                <th>商品类型</th>
+                <th>商品图片</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody class="table-con" >
+            </tbody>
+        </table>
+    </div>
+    <div  class="lu-table-page">
+        <div id="buy_analysis-page"></div>
+    </div>
+</div>
+<script>
+    layui.use(['form','util','laypage','laydate', 'jquery'], function () {
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var $ = layui.jquery;
+        var util = layui.util;
+        var laypage = layui.laypage;
+        var root_=$('#buy-analysis')
+        var date = util.toDateString(new Date(),'yyyy-MM-dd');
+        laydate.render({
+            elem: '#buy-analysis input.time-select'
+            ,type: 'date'
+            ,range: '~'
+            ,max: 0
+            ,value: date+' ~ '+date
+        });
+        function getAll() {
+            common_.ajax_({type: 'post', url: '/validate/platformAll'}).then(function (data1) {
+                laypage.render({
+                    elem: 'buy_analysis-page' //注意，这里的 test1 是 ID，不用加 # 号
+                    , count: data1.count //数据总数，从服务端得到
+                    , limit: data1.limit //数据条数
+                    , curr: 1 //当前页码
+                    , layout: ['prev', 'count', 'page', 'next', 'skip'] //设置操作栏
+                    , jump: function (obj, first) {
+                        common_.ajax_({
+                            type: 'post',
+                            url: '/validate/platform',
+                            data: {page: obj.curr, limit: obj.limit}
+                        }, true).then(function (data) {
+                            var tr = '';
+                            $.each(data.data, function (index, val) {
+                                tr += '<tr>'
+                                tr += '<td>' + val.id + '</td>'
+                                tr += '<td>' + val.name + '</td>'
+                                tr += '<td>' + val.price + '</td>'
+                                tr += '<td>' + val.type + '</td>'
+                                tr += '<td><img style="width: 100px" src="public/shop/' + val.img + '" alt=""></td>'
+                                tr += '<td> <i data-id="' + val.id + '" lay-event="add" class="layui-icon" style="cursor: pointer;font-size: 22px; color: #1E9FFF;">&#xe608;</i></td>'
+                                tr += '</tr>'
+                            });
+                            $('#buy-analysis tbody.table-con').html(tr)
+                        })
+                    }
+                });
+            });
+        }
+        getAll()
+        //监听提交
+        form.on('submit(buyDemo)', function (data) {
+            /*common_.ajax_({type:'post',url:'users/login',data:data.field}).then(function (data1) {
+                window.location.href='/'
+            })*/
+            console.log(data.field.time.split('~'))
+            return false
+        });
+    });
+</script>
