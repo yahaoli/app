@@ -112,18 +112,18 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
             }
         } else {
             var c = await sql.db_mysql('SELECT COUNT(goodsid) as count FROM record WHERE user=? AND goodsid=?', [user_id, goods_id]);
-            if(c[0].count*1===0){
+            if (c[0].count * 1 === 0) {
                 var b = await sql.db_mysql('DELETE FROM store where user=? and goodsid=? and num=0 and isSale=0', [user_id, goods_id]);
                 if (b.affectedRows * 1 === 0) {
                     code = 2;
                     message = '不能删除库存大于0或者未下架的商品';
-                }else {
-                    code=1;
-                    message='删除成功'
+                } else {
+                    code = 1;
+                    message = '删除成功'
                 }
             } else {
-                code=2;
-                message='此商品有关联的订单不能删除'
+                code = 2;
+                message = '此商品有关联的订单不能删除'
             }
 
         }
@@ -231,38 +231,51 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
         }
     }
     , saleDetail: async function (req, res) {
-        var user_id = req.session.user_id,order = req.body.order;
+        var user_id = req.session.user_id, order = req.body.order;
         var sql_text = `SELECT record.goodsid,date_format(record.time,"%Y/%m/%d %H:%i:%s") as time,record.num,record.type as orderType,platform.name,platform.price as price,platform.type,platform.img,store.salePrice FROM record 
 inner join platform on record.goodsid =platform.id 
 inner join store on record.goodsid =store.goodsid and record.user=store.user
 WHERE record.time='${order}' AND record.user=${user_id}`;
-        var data=await  sql.db_mysql(sql_text)
+        var data = await  sql.db_mysql(sql_text)
         res.send({"code": 1, data: data})
     }
-    ,sale_handle: async function (req, res) {
+    , sale_handle: async function (req, res) {
         var handle = req.params.handle
             , user_id = req.session.user_id
             , order = req.body.order
-            , orderType = req.body.orderType*1
-            ,time=format()
-            ,message;
+            , orderType = req.body.orderType * 1
+            , time = format()
+            , message;
         var sql_text = `INSERT INTO store (goodsid,user,num,addtime,isSale)
 select record.goodsid,user,num,'${time}',0 FROM record where user=${user_id} and time='${order}'
 on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num`
-        if(handle==='delete'){
-            message='撤销成功';
-            if(orderType===2||orderType===3){
+        if (handle === 'delete') {
+            message = '撤销成功';
+            if (orderType === 2 || orderType === 3) {
                 await sql.db_mysql(sql_text);
-                await sql.db_mysql('DELETE FROM record where user=? AND time=?',[user_id,order])
-            }else {
-                await sql.db_mysql('DELETE FROM record where user=? AND time=?',[user_id,order])
+                await sql.db_mysql('DELETE FROM record where user=? AND time=?', [user_id, order])
+            } else {
+                await sql.db_mysql('DELETE FROM record where user=? AND time=?', [user_id, order])
             }
-        }else {
+        } else {
             await sql.db_mysql(sql_text)
-            await sql.db_mysql('UPDATE record SET type=4 WHERE user=? AND time=?',[user_id,order])
-            message='退货成功'
+            await sql.db_mysql('UPDATE record SET type=4 WHERE user=? AND time=?', [user_id, order])
+            message = '退货成功'
         }
         res.send({"code": 1, msg: message})
+    }
+    , buy_analysis: async function (req, res) {
+        var user_id = req.session.user_id
+            , startTime = req.body.startTime+' 00:00:00'
+            , endTime = req.body.endTime+' 00:00:00'
+        var data=await sql.db_mysql('SELECT record.goodsid,COUNT(record.num) as num,platform.name,platform.type,platform.img,platform.price FROM record \n' +
+            'inner join platform on record.goodsid =platform.id \n' +
+            'WHERE record.time BETWEEN ? AND ? AND record.user=? GROUP BY record.goodsid;', [startTime,endTime,user_id])
+        if(data.length*1===0){
+            res.send({"code": 2, msg: '此时间段无数据'});
+            return;
+        }
+        res.send({"code": 1,data:data})
     }
 }
 

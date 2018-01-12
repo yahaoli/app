@@ -24,4 +24,5 @@ router
     .post('/saleList',validate_ctl.saleList)
     .post('/saleDetail',validate_ctl.saleDetail)
     .post('/saleSet/:handle',validate_ctl.sale_handle)
+    .post('/buyAnalysis',validate_ctl.buy_analysis)
 module.exports = router;
