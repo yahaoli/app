@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50714
 File Encoding         : 65001
 
-Date: 2017-12-29 17:53:29
+Date: 2018-01-12 13:35:59
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -24,7 +24,8 @@ CREATE TABLE `card` (
   `user` int(10) unsigned NOT NULL COMMENT '用户id',
   `addtime` datetime NOT NULL,
   `num` int(11) NOT NULL COMMENT '数量',
-  UNIQUE KEY `card_index3` (`goodsid`,`user`),
+  `type` int(1) unsigned NOT NULL,
+  UNIQUE KEY `card_index3` (`goodsid`,`user`,`type`) USING BTREE,
   KEY `card_index1` (`goodsid`) USING BTREE,
   KEY `card_index2` (`user`) USING BTREE,
   KEY `card_index4` (`addtime`) USING BTREE,
@@ -35,7 +36,7 @@ CREATE TABLE `card` (
 -- ----------------------------
 -- Records of card
 -- ----------------------------
-INSERT INTO `card` VALUES ('4', '2', '2017-12-26 09:33:02', '1');
+INSERT INTO `card` VALUES ('4', '1', '2018-01-11 17:23:45', '1', '1');
 
 -- ----------------------------
 -- Table structure for platform
@@ -99,7 +100,7 @@ CREATE TABLE `record` (
 -- ----------------------------
 -- Records of record
 -- ----------------------------
-INSERT INTO `record` VALUES ('1', '2017-12-26 10:01:34', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2017-12-26 10:01:34', '1', '2', '1');
 INSERT INTO `record` VALUES ('4', '2017-12-26 10:01:34', '1', '1', '1');
 INSERT INTO `record` VALUES ('1', '2017-12-26 14:31:30', '1', '1', '1');
 INSERT INTO `record` VALUES ('4', '2017-12-26 14:31:30', '1', '1', '1');
@@ -108,6 +109,55 @@ INSERT INTO `record` VALUES ('4', '2017-12-28 18:11:39', '1', '1', '1');
 INSERT INTO `record` VALUES ('6', '2017-12-28 18:11:39', '1', '1', '1');
 INSERT INTO `record` VALUES ('1', '2017-12-29 09:51:41', '22', '1', '1');
 INSERT INTO `record` VALUES ('4', '2017-12-29 09:51:41', '22', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-02 15:37:15', '5', '1', '1');
+INSERT INTO `record` VALUES ('4', '2018-01-02 15:37:15', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('4', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('5', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('6', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('7', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('8', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('9', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('10', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('11', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('12', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('13', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('14', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('23', '2018-01-02 16:02:13', '100', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-03 15:41:01', '1', '1', '1');
+INSERT INTO `record` VALUES ('4', '2018-01-03 15:41:01', '22', '1', '1');
+INSERT INTO `record` VALUES ('4', '2018-01-03 16:10:08', '20', '1', '2');
+INSERT INTO `record` VALUES ('1', '2018-01-03 17:50:53', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-03 18:07:49', '1', '1', '2');
+INSERT INTO `record` VALUES ('1', '2018-01-03 18:26:42', '1', '1', '2');
+INSERT INTO `record` VALUES ('1', '2018-01-03 18:29:50', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-03 18:30:01', '1', '1', '2');
+INSERT INTO `record` VALUES ('1', '2018-01-04 11:43:11', '1', '1', '1');
+INSERT INTO `record` VALUES ('4', '2018-01-04 11:43:11', '1', '1', '1');
+INSERT INTO `record` VALUES ('5', '2018-01-04 11:43:11', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-09 17:57:13', '1', '1', '2');
+INSERT INTO `record` VALUES ('1', '2018-01-09 17:58:17', '2', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-09 17:58:40', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-09 18:11:27', '3', '1', '2');
+INSERT INTO `record` VALUES ('1', '2018-01-09 18:18:19', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-09 18:18:55', '1', '1', '2');
+INSERT INTO `record` VALUES ('1', '2018-01-09 18:19:27', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-09 18:19:52', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-09 18:20:03', '2', '1', '2');
+INSERT INTO `record` VALUES ('1', '2018-01-09 18:20:34', '1', '1', '1');
+INSERT INTO `record` VALUES ('1', '2018-01-09 18:20:53', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-09 18:23:00', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-09 18:35:14', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-09 18:35:23', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-10 09:50:17', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-10 11:59:25', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-10 12:01:29', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-10 12:01:39', '1', '1', '4');
+INSERT INTO `record` VALUES ('4', '2018-01-10 12:01:57', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-10 12:50:07', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-10 12:51:42', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-10 12:51:57', '1', '1', '2');
+INSERT INTO `record` VALUES ('4', '2018-01-10 12:52:06', '1', '1', '2');
 
 -- ----------------------------
 -- Table structure for store
@@ -132,9 +182,20 @@ CREATE TABLE `store` (
 -- ----------------------------
 -- Records of store
 -- ----------------------------
-INSERT INTO `store` VALUES ('1', '22', '2017-12-29 09:51:41', null, '1', '0', null);
-INSERT INTO `store` VALUES ('4', '23', '2017-12-29 09:51:41', null, '1', '0', null);
-INSERT INTO `store` VALUES ('6', '1', '2017-12-28 18:11:39', null, '1', '0', null);
+INSERT INTO `store` VALUES ('1', '0', '2018-01-09 18:20:34', '2018-01-09 18:20:53', '1', '0', '12.00');
+INSERT INTO `store` VALUES ('4', '57', '2018-01-04 11:43:11', null, '1', '1', '111.00');
+INSERT INTO `store` VALUES ('4', '1', '2018-01-02 15:37:15', null, '2', '0', null);
+INSERT INTO `store` VALUES ('5', '221', '2018-01-04 11:43:11', null, '1', '1', '22.00');
+INSERT INTO `store` VALUES ('6', '100', '2018-01-02 16:02:13', null, '1', '1', '33.00');
+INSERT INTO `store` VALUES ('7', '100', '2018-01-02 16:02:13', null, '1', '1', '22.00');
+INSERT INTO `store` VALUES ('8', '100', '2018-01-02 16:02:13', null, '1', '1', '22.00');
+INSERT INTO `store` VALUES ('9', '100', '2018-01-02 16:02:13', null, '1', '1', '22.00');
+INSERT INTO `store` VALUES ('10', '100', '2018-01-02 16:02:13', null, '1', '1', '22.00');
+INSERT INTO `store` VALUES ('11', '100', '2018-01-02 16:02:13', null, '1', '1', '23.00');
+INSERT INTO `store` VALUES ('12', '100', '2018-01-02 16:02:13', null, '1', '1', '44.00');
+INSERT INTO `store` VALUES ('13', '100', '2018-01-02 16:02:13', null, '1', '1', '26.00');
+INSERT INTO `store` VALUES ('14', '100', '2018-01-02 16:02:13', null, '1', '1', '24.00');
+INSERT INTO `store` VALUES ('23', '100', '2018-01-02 16:02:13', null, '1', '1', '44.00');
 
 -- ----------------------------
 -- Table structure for user
