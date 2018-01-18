@@ -1,0 +1,208 @@
+<div id="sell-analysis">
+    <form class="layui-form" lay-filter="sellDemo">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">日期</label>
+                <div class="layui-input-inline" style="width: 200px;">
+                    <input readonly type="text" name="time" lay-verify="required" class="layui-input  time-select">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <select name="type">
+                        <option value="2">销售</option>
+                        <option value="3">损毁</option>
+                        <option value="4">退货</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <div class="layui-input-inline" style="width: 214px">
+                    <button class="layui-btn" lay-submit lay-filter="sellDemo">查询</button>
+                    <button class="layui-btn" lay-submit lay-filter="sellDemo1">出货分析饼状图</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="layui-table-box" style="height: 500px;overflow: auto">
+        <table class="layui-table">
+            <thead>
+            <tr>
+                <th>商品编号</th>
+                <th>商品名</th>
+                <th>商品成本价</th>
+                <th>商品类型</th>
+                <th>商品图片</th>
+                <th>数量</th>
+                <th>总计（元）</th>
+            </tr>
+            </thead>
+            <tbody class="table-con">
+            </tbody>
+        </table>
+    </div>
+    <div class="lu-table-page" style="display: none">
+
+    </div>
+</div>
+<script src="public/javascripts/echarts.min.js"></script>
+<script>
+    layui.use(['form', 'util', 'layer', 'laydate', 'jquery'], function () {
+        var form = layui.form;
+        var layer = layui.layer;
+        var laydate = layui.laydate;
+        var $ = layui.jquery;
+        var util = layui.util;
+        var root_ = $('#sell-analysis')
+        var currentDate = util.toDateString(new Date(), 'yyyy-MM-dd');
+        form.render(null, 'sellDemo');
+        laydate.render({
+            elem: '#sell-analysis input.time-select'
+            , type: 'date'
+            , range: '~'
+            , max: 0
+            , value: currentDate + ' ~ ' + currentDate
+            , btns: ['confirm']
+        });
+
+        function getAll(startTime, endTime, type) {
+            root_.find('tbody.table-con').html('');
+            root_.find('div.lu-table-page').hide();
+            common_.ajax_({
+                type: 'post',
+                url: '/validate/sellAnalysis',
+                data: {startTime: startTime, endTime: endTime, type: type}
+            }, true).then(function (data) {
+                var tr = '', giftType = data.data.length, giftNum = 0, giftPrice = 0;
+                $.each(data.data, function (index, val) {
+                    giftNum += val.num * 1;
+                    giftPrice += val.num * val.price;
+                    tr += '<tr>'
+                    tr += '<td>' + val.goodsid + '</td>'
+                    tr += '<td>' + val.name + '</td>'
+                    tr += '<td>' + val.price + '</td>'
+                    tr += '<td>' + val.type + '</td>'
+                    tr += '<td><img style="width: 100px" src="public/shop/' + val.img + '" alt=""></td>'
+                    tr += '<td>' + val.num + '</td>'
+                    tr += '<td>' + (val.num * val.price).toFixed(2) + '</td>'
+                    tr += '</tr>'
+                });
+                root_.find('tbody.table-con').html(tr);
+                root_.find('div.lu-table-page').show().html('<div style="height: 30px;line-height: 30px;padding:0 5px 5px 0 ;font-size: 18px;text-align: right"><span >种类：' + giftType + '</span><span style="padding:0 10px">数量：' + giftNum + '</span><span>总价：' + giftPrice.toFixed(2) + '元</span></div>')
+            })
+        }
+
+        //监听提交
+        form.on('submit(sellDemo)', function (data) {
+            var date = data.field.time.split(' ~ '), type = data.field.type;
+            var startTime = date[0], endTime = date[1]
+            endTime = endTime.replace(/-/g, "/");
+            endTime = new Date(Date.parse(endTime));
+            endTime.setDate(endTime.getDate() + 1)
+            endTime = endTime.getFullYear() + '-' + util.digit(endTime.getMonth() + 1, 2) + '-' + util.digit(endTime.getDate(), 2)
+            getAll(startTime, endTime, type)
+            return false
+        });
+        form.on('submit(sellDemo1)', function (data) {
+            var date = data.field.time.split(' ~ '), type = data.field.type;
+            var startTime = date[0], endTime = date[1]
+            endTime = endTime.replace(/-/g, "/");
+            endTime = new Date(Date.parse(endTime));
+            endTime.setDate(endTime.getDate() + 1)
+            endTime = endTime.getFullYear() + '-' + util.digit(endTime.getMonth() + 1, 2) + '-' + util.digit(endTime.getDate(), 2);
+            common_.ajax_({
+                type: 'post',
+                url: '/validate/sellAnalysisChart',
+                data: {startTime: startTime, endTime: endTime}
+            }, true).then(function (data) {
+                var list = ['销售', '损毁', '退货'];
+                var currentList = [];
+                $.each(data.data, function (index, val) {
+                    val.reocrdType = list[val.reocrdType * 1 - 2];
+                    currentList[index] = val;
+                })
+                layer.open({
+                    type: 1,
+                    area: ['800px', '300px'], //宽高
+                    content: '<div id="sell-analysis-chart" style="width: 100%;height: 100%"></div>',
+                    success: function (layero, index) {
+                        var myChart = echarts.init(document.getElementById('sell-analysis-chart'));
+                        var option = {
+                            title: [
+                                {
+                                    text: '出货数量分析饼状图',
+                                    subtext: '时间:' + startTime + '~' + endTime,
+                                    x: '25%',
+                                    textAlign: 'center'
+                                },
+                                {
+                                    text: '出货金额分析饼状图',
+                                    subtext: '时间:' + startTime + '~' + endTime,
+                                    x: '75%',
+                                    textAlign: 'center'
+                                }
+                            ],
+                            tooltip:
+                                {
+                                    trigger: 'item',
+                                    formatter:  function (params, ticket, callback) {
+                                       var type=params.seriesName,
+                                        name=params.name,
+                                        value=params.value,
+                                        percent=params.percent;
+                                        var a=params.seriesName==='出货数量分析'?''+type+' <br/>'+name+' : '+value+'个 ('+percent+'%)':''+type+' <br/>'+name+' : '+value+'元 ('+percent+'%)';
+                                        return a;
+                                    }
+                                },
+                            legend: {
+                                orient: 'vertical',
+                                left: 'left',
+                                data: $.map(currentList, function (val) {
+                                    return val.reocrdType
+                                })
+                            },
+                            series: [
+                                {
+                                    name: '出货数量分析',
+                                    type: 'pie',
+                                    radius: '55%',
+                                    center: ['25%', '50%'],
+                                    data: $.map(currentList, function (val) {
+                                        return {name: val.reocrdType, value: val.countNum}
+                                    }),
+                                    itemStyle: {
+                                        emphasis: {
+                                            shadowBlur: 10,
+                                            shadowOffsetX: 0,
+                                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                        }
+                                    }
+                                },
+                                {
+                                    name: '出货金额分析',
+                                    type: 'pie',
+                                    radius: '55%',
+                                    center: ['75%', '50%'],
+                                    data: $.map(currentList, function (val) {
+                                        return {name: val.reocrdType, value: val.countPrice}
+                                    }),
+                                    itemStyle: {
+                                        emphasis: {
+                                            shadowBlur: 10,
+                                            shadowOffsetX: 0,
+                                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                        }
+                                    }
+                                }
+                            ]
+                        };
+                        myChart.setOption(option);
+                    }
+                });
+            })
+
+            return false
+        });
+
+    });
+</script>

@@ -1,5 +1,5 @@
 <div id="buy-analysis">
-    <form class="layui-form">
+    <form class="layui-form" lay-filter="buyDemo">
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">日期</label>
@@ -20,7 +20,7 @@
             <tr>
                 <th>商品编号</th>
                 <th>商品名</th>
-                <th>商品价格</th>
+                <th>商品成本价</th>
                 <th>商品类型</th>
                 <th>商品图片</th>
                 <th>数量</th>
@@ -44,6 +44,7 @@
         var util = layui.util;
         var root_ = $('#buy-analysis')
         var currentDate = util.toDateString(new Date(), 'yyyy-MM-dd');
+        form.render(null, 'buyDemo');
         laydate.render({
             elem: '#buy-analysis input.time-select'
             , type: 'date'
@@ -71,11 +72,11 @@
                     tr += '<td>' + val.type + '</td>'
                     tr += '<td><img style="width: 100px" src="public/shop/' + val.img + '" alt=""></td>'
                     tr += '<td>'+val.num+'</td>'
-                    tr += '<td>'+val.num*val.price+'</td>'
+                    tr += '<td>'+(val.num*val.price).toFixed(2)+'</td>'
                     tr += '</tr>'
                 });
                 root_.find('tbody.table-con').html(tr);
-                root_.find('div.lu-table-page').show().html('<div style="height: 30px;line-height: 30px;padding:0 5px 5px 0 ;font-size: 18px;text-align: right"><span >种类：'+giftType+'</span><span style="padding:0 10px">数量：'+giftNum+'</span><span>总价：'+giftPrice+'元</span></div>')
+                root_.find('div.lu-table-page').show().html('<div style="height: 30px;line-height: 30px;padding:0 5px 5px 0 ;font-size: 18px;text-align: right"><span >种类：'+giftType+'</span><span style="padding:0 10px">数量：'+giftNum+'</span><span>总价：'+giftPrice.toFixed(2)+'元</span></div>')
             })
         }
         //监听提交
