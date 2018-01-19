@@ -24,13 +24,13 @@
             </div>
         </div>
     </form>
-    <div class="layui-table-box" style="height: 500px;overflow: auto">
+    <div class="layui-table-box  table-size" style="height: 500px;overflow: auto">
         <table class="layui-table">
             <thead>
             <tr>
                 <th>商品编号</th>
                 <th>商品名</th>
-                <th>商品成本价</th>
+                <th>商品售价</th>
                 <th>商品类型</th>
                 <th>商品图片</th>
                 <th>数量</th>
@@ -104,8 +104,8 @@
             return false
         });
         form.on('submit(sellDemo1)', function (data) {
-            var date = data.field.time.split(' ~ '), type = data.field.type;
-            var startTime = date[0], endTime = date[1]
+            var dateTime = data.field.time.split(' ~ '), type = data.field.type;
+            var startTime = dateTime[0], endTime = dateTime[1]
             endTime = endTime.replace(/-/g, "/");
             endTime = new Date(Date.parse(endTime));
             endTime.setDate(endTime.getDate() + 1)
@@ -131,13 +131,13 @@
                             title: [
                                 {
                                     text: '出货数量分析饼状图',
-                                    subtext: '时间:' + startTime + '~' + endTime,
+                                    subtext: '时间:' + dateTime.join('~'),
                                     x: '25%',
                                     textAlign: 'center'
                                 },
                                 {
                                     text: '出货金额分析饼状图',
-                                    subtext: '时间:' + startTime + '~' + endTime,
+                                    subtext: '时间:' + dateTime.join('~'),
                                     x: '75%',
                                     textAlign: 'center'
                                 }

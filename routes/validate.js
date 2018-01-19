@@ -27,4 +27,5 @@ router
     .post('/buyAnalysis',validate_ctl.buy_analysis)
     .post('/sellAnalysis',validate_ctl.sell_analysis)
     .post('/sellAnalysisChart',validate_ctl.sell_analysisChart)
+    .post('/moneyAnalysisChart',validate_ctl.money_analysisChart)
 module.exports = router;

@@ -282,9 +282,10 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num`
             , startTime = req.body.startTime+' 00:00:00'
             , endTime = req.body.endTime+' 00:00:00'
             , type = req.body.type
-        var data=await sql.db_mysql('SELECT record.goodsid,sum(record.num) as num,platform.name,platform.type,platform.img,platform.price FROM record \n' +
+        var data=await sql.db_mysql('SELECT record.goodsid,sum(record.num) as num,platform.name,platform.type,platform.img,store.salePrice as price FROM record \n' +
             'inner join platform on record.goodsid =platform.id \n' +
-            'WHERE record.time BETWEEN ? AND ? AND record.user=? AND record.type=? GROUP BY record.goodsid;', [startTime,endTime,user_id,type])
+            'inner join store on record.goodsid =store.goodsid AND record.user=store.user \n'+
+        'WHERE record.time BETWEEN ? AND ? AND record.user=? AND record.type=? GROUP BY record.goodsid;', [startTime,endTime,user_id,type])
         if(data.length*1===0){
             res.send({"code": 2, msg: '此时间段无数据'});
             return;
@@ -296,9 +297,25 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num`
             , startTime = req.body.startTime+' 00:00:00'
             , endTime = req.body.endTime+' 00:00:00'
 
-        var data=await sql.db_mysql('select sum(u.allNum) as countNum,sum(u.allPrice) as countPrice,u.reocrdType from (SELECT record.goodsid,record.type as reocrdType,platform.price,sum(record.num) as allNum,sum(record.num)*platform.price as allPrice,platform.name,platform.type,platform.img FROM record \n' +
+        var data=await sql.db_mysql('select sum(u.allNum) as countNum,sum(u.allPrice) as countPrice,u.reocrdType from (SELECT record.goodsid,record.type as reocrdType,sum(record.num) as allNum,sum(record.num)*store.salePrice as allPrice FROM record \n' +
             'inner join platform on record.goodsid =platform.id \n' +
+            'inner join store on record.goodsid =store.goodsid AND record.user=store.user \n'+
             'WHERE record.time BETWEEN ? AND ? AND record.user=? AND record.type!=1 GROUP BY record.goodsid,record.type) u GROUP BY u.reocrdType', [startTime,endTime,user_id])
+        if(data.length*1===0){
+            res.send({"code": 2, msg: '此时间段无数据'});
+            return;
+        }
+        res.send({"code": 1,data:data})
+    }
+    , money_analysisChart: async function (req, res) {
+        var user_id = req.session.user_id
+            , startTime = req.body.startTime+' 00:00:00'
+            , endTime = req.body.endTime+' 00:00:00'
+
+        var data=await sql.db_mysql('select sum(u.allNum) as countNum,sum(u.allPrice) as countPrice,sum(u.allSalePrice) as countSalePrice,u.reocrdType from (SELECT record.goodsid,record.type as reocrdType,sum(record.num) as allNum,sum(record.num)*platform.price as allPrice,sum(record.num)*store.salePrice as allSalePrice FROM record \n' +
+            'inner join platform on record.goodsid =platform.id \n' +
+            'inner join store on record.goodsid =store.goodsid AND record.user=store.user AND record.type!=1 \n' +
+            'WHERE record.time BETWEEN ? AND ? AND record.user=? GROUP BY record.goodsid,record.type) u GROUP BY u.reocrdType', [startTime,endTime,user_id])
         if(data.length*1===0){
             res.send({"code": 2, msg: '此时间段无数据'});
             return;
