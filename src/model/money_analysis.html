@@ -53,14 +53,18 @@
                 data: {startTime: startTime, endTime: endTime}
             }, true).then(function (data) {
                 var list = ['销售', '损毁', '退货'];
-                var currentList = [],saleGet=0;
+                var currentList = [], saleGet = 0;
                 $.each(data.data, function (index, val) {
-                    if(val.reocrdType*1===2){saleGet+=(val.countSalePrice-val.countPrice)}
-                    if(val.reocrdType*1===3){saleGet-=val.countPrice;}
+                    if (val.reocrdType * 1 === 2) {
+                        saleGet += (val.countSalePrice - val.countPrice)
+                    }
+                    if (val.reocrdType * 1 === 3) {
+                        saleGet -= val.countPrice;
+                    }
                     val.reocrdType = list[val.reocrdType * 1 - 2];
                     currentList[index] = val;
                 });
-                currentList.push({countSalePrice: saleGet, reocrdType:'利润',coutNum:0})
+                currentList.push({countSalePrice: saleGet, reocrdType: '利润', countNum: '-'})
                 var myChart = echarts.init(document.getElementById('money-analysis-chart1'));
                 var option = {
                     title: {
@@ -81,7 +85,7 @@
                     xAxis: [
                         {
                             type: 'category',
-                            data: [date.join('~')+'财务分析',date.join('~')+'数量分析']
+                            data: [date.join('~') + '财务分析', date.join('~') + '数量分析']
                         }
                     ],
                     yAxis: [
@@ -89,18 +93,11 @@
                             type: 'value'
                         }
                     ],
-                    series:[
-                        $.map(currentList, function (val) {
-                            return {
-                                name: val.reocrdType, type: 'bar', data: [val.countSalePrice]
-                            }
-                        }),
-                        $.map(currentList, function (val) {
-                            return {
-                                name: val.reocrdType, type: 'bar', data: [val.countNum]
-                            }
-                        }),
-                    ]
+                    series: $.map(currentList, function (val) {
+                        return {
+                            name: val.reocrdType, type: 'bar', data: [val.countSalePrice,val.countNum]
+                        }
+                    }),
                 };
                 myChart.setOption(option);
             })
