@@ -3,6 +3,21 @@
         cursor: pointer;
     }
 </style>
+<form class="layui-form" lay-filter="orderDemo">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">日期</label>
+            <div class="layui-input-inline" style="width: 200px;">
+                <input id="sale-detail-time" readonly type="text" name="time" lay-verify="required" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <div class="layui-input-inline" style="width: 214px">
+                <button class="layui-btn" lay-submit lay-filter="orderDemo">查询</button>
+            </div>
+        </div>
+    </div>
+</form>
 <div class="layui-table-box table-size" style="height: 500px;overflow: auto">
     <table class="layui-table">
         <thead>
@@ -18,22 +33,47 @@
     </table>
 
 </div>
-<div class="lu-table-page">
+<div class="lu-table-page" style="display: none">
     <div id="sale-detail-page"></div>
-    <div style="position: absolute;right: 20px;top:1px">
+    <!--<div style="position: absolute;right: 20px;top:1px">
         <button class="layui-btn container-refresh">
             <i class="layui-icon">&#x1002;</i>刷新
         </button>
-    </div>
+    </div>-->
 </div>
 <script>
-    layui.use(['jquery', 'laypage', 'layer'], function () {
+    layui.use(['form','jquery','util', 'laypage', 'laydate','layer'], function () {
         var layer = layui.layer, $ = layui.$;
         var laypage = layui.laypage;
         var a = ["购买", "销售", "损耗", "退货"];
-
-        function getAll() {
-            common_.ajax_({type: 'post', url: '/validate/saleAll'}).then(function (data1) {
+        var laydate = layui.laydate;
+        var util = layui.util;
+        var form = layui.form;
+        var currentDate = util.toDateString(new Date(), 'yyyy-MM-dd');
+        form.render(null, 'orderDemo');
+        laydate.render({
+            elem: '#sale-detail-time'
+            , type: 'date'
+            , range: '~'
+            , max: 0
+            , value: currentDate + ' ~ ' + currentDate
+            , btns: ['confirm']
+        });
+        //监听提交
+        form.on('submit(orderDemo)', function (data) {
+            var date = data.field.time.split(' ~ '), type = data.field.type;
+            var startTime = date[0], endTime = date[1]
+            endTime = endTime.replace(/-/g, "/");
+            endTime = new Date(Date.parse(endTime));
+            endTime.setDate(endTime.getDate() + 1)
+            endTime = endTime.getFullYear() + '-' + util.digit(endTime.getMonth() + 1, 2) + '-' + util.digit(endTime.getDate(), 2)
+            getAll(startTime, endTime)
+            return false
+        });
+        function getAll(startTime, endTime) {
+            $('#sale-detail-page').parent().hide()
+            $('#sale-detail').html('');
+            common_.ajax_({type: 'post', url: '/validate/saleAll',data:{startTime:startTime,endTime:endTime}}).then(function (data1) {
                 laypage.render({
                     elem: 'sale-detail-page' //注意，这里的 test1 是 ID，不用加 # 号
                     , count: data1.count //数据总数，从服务端得到
@@ -44,7 +84,7 @@
                         common_.ajax_({
                             type: 'post',
                             url: '/validate/saleList',
-                            data: {page: obj.curr, limit: obj.limit}
+                            data: {page: obj.curr, limit: obj.limit,startTime:startTime,endTime:endTime}
                         }, true).then(function (data) {
                             var tr = '';
                             $.each(data.data, function (index, val) {
@@ -55,17 +95,13 @@
                                 tr += '<td>' + a[val.type * 1 - 1] + '</td>'
                                 tr += '</tr>'
                             });
-                            $('#sale-detail').html(tr)
+                            $('#sale-detail').html(tr);
+                            $('#sale-detail-page').parent().show()
                         })
                     }
                 });
             });
         }
-        getAll()
-        //刷新
-        $('#sale-detail-page').next().find('button.container-refresh').click(function () {
-            getAll()
-        });
         $('#sale-detail').on('click', 'td.order', function () {
             var order = $(this).attr('data-order');
             addTab('订单详情', 'model/sale_list.html').then(function () {

@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50714
 File Encoding         : 65001
 
-Date: 2018-01-12 13:35:59
+Date: 2018-01-21 16:38:13
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -36,7 +36,6 @@ CREATE TABLE `card` (
 -- ----------------------------
 -- Records of card
 -- ----------------------------
-INSERT INTO `card` VALUES ('4', '1', '2018-01-11 17:23:45', '1', '1');
 
 -- ----------------------------
 -- Table structure for platform
@@ -158,6 +157,17 @@ INSERT INTO `record` VALUES ('4', '2018-01-10 12:50:07', '1', '1', '2');
 INSERT INTO `record` VALUES ('4', '2018-01-10 12:51:42', '1', '1', '2');
 INSERT INTO `record` VALUES ('4', '2018-01-10 12:51:57', '1', '1', '2');
 INSERT INTO `record` VALUES ('4', '2018-01-10 12:52:06', '1', '1', '2');
+INSERT INTO `record` VALUES ('1', '2018-01-18 09:39:56', '10', '1', '1');
+INSERT INTO `record` VALUES ('4', '2018-01-18 09:39:56', '10', '1', '1');
+INSERT INTO `record` VALUES ('5', '2018-01-18 09:39:56', '10', '1', '1');
+INSERT INTO `record` VALUES ('4', '2018-01-18 09:41:34', '10', '1', '3');
+INSERT INTO `record` VALUES ('5', '2018-01-18 09:41:34', '10', '1', '3');
+INSERT INTO `record` VALUES ('1', '2018-01-18 13:41:35', '10', '1', '4');
+INSERT INTO `record` VALUES ('4', '2018-01-18 13:41:35', '10', '1', '4');
+INSERT INTO `record` VALUES ('5', '2018-01-18 13:41:35', '10', '1', '4');
+INSERT INTO `record` VALUES ('4', '2018-01-18 13:42:45', '10', '1', '2');
+INSERT INTO `record` VALUES ('5', '2018-01-18 13:42:45', '10', '1', '2');
+INSERT INTO `record` VALUES ('6', '2018-01-18 13:42:45', '10', '1', '2');
 
 -- ----------------------------
 -- Table structure for store
@@ -182,11 +192,11 @@ CREATE TABLE `store` (
 -- ----------------------------
 -- Records of store
 -- ----------------------------
-INSERT INTO `store` VALUES ('1', '0', '2018-01-09 18:20:34', '2018-01-09 18:20:53', '1', '0', '12.00');
-INSERT INTO `store` VALUES ('4', '57', '2018-01-04 11:43:11', null, '1', '1', '111.00');
+INSERT INTO `store` VALUES ('1', '10', '2018-01-18 09:39:56', '2018-01-18 13:41:35', '1', '1', '12.00');
+INSERT INTO `store` VALUES ('4', '47', '2018-01-18 09:39:56', null, '1', '1', '111.00');
 INSERT INTO `store` VALUES ('4', '1', '2018-01-02 15:37:15', null, '2', '0', null);
-INSERT INTO `store` VALUES ('5', '221', '2018-01-04 11:43:11', null, '1', '1', '22.00');
-INSERT INTO `store` VALUES ('6', '100', '2018-01-02 16:02:13', null, '1', '1', '33.00');
+INSERT INTO `store` VALUES ('5', '211', '2018-01-18 09:39:56', null, '1', '1', '22.00');
+INSERT INTO `store` VALUES ('6', '90', '2018-01-02 16:02:13', null, '1', '1', '33.00');
 INSERT INTO `store` VALUES ('7', '100', '2018-01-02 16:02:13', null, '1', '1', '22.00');
 INSERT INTO `store` VALUES ('8', '100', '2018-01-02 16:02:13', null, '1', '1', '22.00');
 INSERT INTO `store` VALUES ('9', '100', '2018-01-02 16:02:13', null, '1', '1', '22.00');

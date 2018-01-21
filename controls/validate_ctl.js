@@ -213,8 +213,15 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
     }
     , saleAll: async function (req, res) {
         try {
-            var user_id = req.session.user_id;
-            var order = await sql.db_mysql('select count(*) as count from (SELECT type FROM record WHERE user=? GROUP BY time,type) u', [user_id]);
+            var user_id = req.session.user_id
+                , startTime = req.body.startTime+' 00:00:00'
+                , endTime = req.body.endTime+' 00:00:00'
+
+            var order = await sql.db_mysql('select count(*) as count from (SELECT type FROM record WHERE user=? and time BETWEEN ? AND ? GROUP BY time,type) u', [user_id,startTime,endTime]);
+            if(order[0].count*1===0){
+                res.send({"code": 2, msg: '此时间段无数据'});
+                return;
+            }
             res.send({"code": 1, "count": order[0].count, limit: 10})
         } catch (err) {
             console.log(err.message)
@@ -222,9 +229,12 @@ on DUPLICATE KEY UPDATE store.num=VALUES(num)+store.num,store.addtime='${time}'`
     }
     , saleList: async function (req, res) {
         try {
-            var user_id = req.session.user_id, start = (parseInt(req.body.page) - 1) * req.body.limit,
-                end = parseInt(req.body.limit);
-            var data = await sql.db_mysql('SELECT date_format(time,"%Y/%m/%d %H:%i:%s") as time,UNIX_TIMESTAMP(time) as orderNum,type FROM record WHERE user=? GROUP BY time,type ORDER BY time DESC LIMIT ?,?', [user_id, start, end]);
+            var user_id = req.session.user_id,
+                start = (parseInt(req.body.page) - 1) * req.body.limit
+                , startTime = req.body.startTime+' 00:00:00'
+                , endTime = req.body.endTime+' 00:00:00'
+                ,end = parseInt(req.body.limit);
+            var data = await sql.db_mysql('SELECT date_format(time,"%Y/%m/%d %H:%i:%s") as time,UNIX_TIMESTAMP(time) as orderNum,type FROM record WHERE user=? and time BETWEEN ? AND ? GROUP BY time,type ORDER BY time DESC LIMIT ?,?', [user_id,startTime,endTime,start, end]);
             res.send({"code": 1, data: data})
         } catch (err) {
             console.log(err.message)
